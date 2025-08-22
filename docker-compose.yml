@@ -1,0 +1,17 @@
+include:
+  - path: ./supabase-project/docker-compose.yml
+
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3500:8000"
+    environment:
+      - DENO_ENV=production
+    networks:
+      - default

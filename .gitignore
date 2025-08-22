@@ -1,0 +1,14 @@
+# Supabase
+supabase/.branches
+supabase/.temp
+supabase/logs
+supabase/docker
+
+# Volumes di Docker
+**/volumes/
+**/data/
+**/pgdata/
+**/postgres/
+
+_fresh
+.vscode/
