@@ -1,0 +1,24 @@
+{
+  "name": "recipe_generator_node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --env-file=.env --watch-path=src src/index.js",
+    "lint": "biome check --write"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.1",
+    "@types/node": "^24.0.12"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "form-data": "^4.0.3",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
