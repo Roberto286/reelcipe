@@ -23,9 +23,9 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./recipe_telegram_bot:/app # monta il codice locale
-      - /app/node_modules # evita conflitto node_modules
     environment:
-      - NODE_ENV=development
+      NODE_ENV: development
+      RUNNER: docker
     networks:
       - default
 

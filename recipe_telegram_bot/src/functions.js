@@ -1,5 +1,6 @@
 export function isUrl(text) {
-    const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+    const urlRegex =
+        /^(https?:\/\/)?([\w\-]+(\.[\w\-]+)+)(:\d+)?(\/[^\s?]*)?(\?[^\s#]*)?(#[^\s]*)?$/i;
 
     return urlRegex.test(text);
 }

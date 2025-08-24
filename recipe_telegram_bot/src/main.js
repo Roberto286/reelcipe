@@ -15,5 +15,5 @@ const bot = new Telegraf(botToken);
 bot.on(message("text"), handleMessage);
 
 bot.launch(() => {
-    console.log("Bot started");
+    console.log("Bot started!");
 });
