@@ -2,7 +2,7 @@ import { spawnAsync } from "../lib/spawn-async.js";
 
 export async function extractAudioFrom(videoPath) {
   //Anche qui non avevo sbatti di riscrivere la logica per estrarre l'audio allora ho importato lo script in python
-  const { stdout } = await spawnAsync("python", [
+  const { stdout } = await spawnAsync("python3", [
     "-u",
     "src/audio/extractor.py",
     videoPath,

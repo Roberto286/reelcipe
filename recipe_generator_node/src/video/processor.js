@@ -2,7 +2,7 @@ import { Status } from "../enum/status.enum.js";
 import { spawnAsync } from "../lib/spawn-async.js";
 
 export async function downloadVideo(url) {
-  const { stdout } = await spawnAsync("python", [
+  const { stdout } = await spawnAsync("python3", [
     "-u",
     "src/video/downloader.py",
     url,
