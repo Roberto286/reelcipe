@@ -15,3 +15,31 @@ services:
       - DENO_ENV=production
     networks:
       - default
+
+  telegram-bot:
+    container_name: telegram-bot
+    build:
+      context: ./recipe_telegram_bot
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./recipe_telegram_bot:/app # monta il codice locale
+      - /app/node_modules # evita conflitto node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - default
+
+  recipe-generator:
+    container_name: recipe-generator
+    build:
+      context: ./recipe_generator_node
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./recipe_generator_node:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "7823:8000"
+    networks:
+      - default

@@ -1,17 +1,19 @@
-import { Telegraf } from "telegraf"
-import { message } from 'telegraf/filters'
-import { handleMessage } from "./handlers.js"
+import { Telegraf } from "telegraf";
+import { message } from "telegraf/filters";
+import { handleMessage } from "./handlers.js";
 
-const botToken = process.env.BOT_TOKEN
+const botToken = process.env.BOT_TOKEN;
 if (!botToken) {
-    console.log(`env variable "BOT_TOKEN" should have a value. (check your .env file)`)
-    process.exit(1)
+    console.log(
+        `env variable "BOT_TOKEN" should have a value. (check your .env file)`,
+    );
+    process.exit(1);
 }
 
 const bot = new Telegraf(botToken);
 
-bot.on(message('text'), handleMessage)
+bot.on(message("text"), handleMessage);
 
-bot.launch()
-
-
+bot.launch(() => {
+    console.log("Bot started");
+});

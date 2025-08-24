@@ -12,3 +12,5 @@ supabase/docker
 
 _fresh
 .vscode/
+
+**/.env
