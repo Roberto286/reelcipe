@@ -18,4 +18,4 @@ RUN pnpm install
 COPY src src
 COPY .env .
 
-CMD ["pnpm", "dev"]
+CMD ["pnpm", "start"]

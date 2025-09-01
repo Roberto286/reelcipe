@@ -1,9 +1,9 @@
-import { Hono, Next } from "jsr:@hono/hono";
+import { Context, Hono, Next } from "jsr:@hono/hono";
 import { cors } from "jsr:@hono/hono/cors";
 import { logger } from "jsr:@hono/hono/logger";
 import { HTTPException } from "jsr:@hono/hono/http-exception";
 import { createClient, User } from "jsr:@supabase/supabase-js@2";
-import { Context } from "node:vm";
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!,
