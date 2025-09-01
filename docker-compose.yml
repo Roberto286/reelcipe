@@ -19,10 +19,10 @@ services:
   telegram-bot:
     container_name: telegram-bot
     build:
-      context: ./recipe_telegram_bot
+      context: ./telegram-bot
       dockerfile: Dockerfile.dev
     volumes:
-      - ./recipe_telegram_bot:/app # monta il codice locale
+      - ./telegram-bot:/app # monta il codice locale
     environment:
       NODE_ENV: development
       RUNNER: docker
@@ -32,14 +32,40 @@ services:
   recipe-generator:
     container_name: recipe-generator
     build:
-      context: ./recipe_generator_node
+      context: ./recipe-generator
       dockerfile: Dockerfile.dev
     volumes:
-      - ./recipe_generator_node:/app
+      - ./recipe-generator:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
     ports:
       - "7823:8000"
+    networks:
+      - default
+  auth-service:
+    container_name: auth-service
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "deno",
+          "eval",
+          "const res = await fetch('http://studio:3000/api/platform/profile'); if (res.status !== 200) { console.error('Healthcheck failed with status', res.status); Deno.exit(1); }",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./auth-service:/app
+    ports:
+      - "3569:8000"
+    environment:
+      - DENO_ENV=production
+      - SUPABASE_URL=http://kong:8000
     networks:
       - default
