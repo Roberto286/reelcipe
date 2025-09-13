@@ -8,6 +8,7 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!,
 );
+
 const app = new Hono();
 type CustomContext = Context & {
   get(key: "user"): User;
@@ -32,7 +33,10 @@ const validateEmail = (email: string): boolean => {
 };
 
 const validatePassword = (password: string): boolean => {
-  return !!password && password.length >= 6;
+  // Strong password validation: at least 8 characters with uppercase, lowercase, digit, and special character
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return passwordRegex.test(password);
 };
 
 const extractToken = (authHeader: string | undefined): string | null => {
@@ -41,6 +45,11 @@ const extractToken = (authHeader: string | undefined): string | null => {
   }
   return authHeader.split("Bearer ")[1];
 };
+function parseMessage(error: unknown) {
+  return typeof error === "object" && error !== null && "message" in error
+    ? (error as { message: string }).message
+    : String(error);
+}
 
 // Middleware per validazione token
 const requireAuth = async (c: CustomContext, next: Next) => {
@@ -123,7 +132,8 @@ app.post("/signup", async (c) => {
 
     if (!validatePassword(password)) {
       throw new HTTPException(400, {
-        message: "Password must be at least 6 characters long",
+        message:
+          "Password must be at least 8 characters with uppercase, lowercase, digit, and special character",
       });
     }
 
@@ -136,6 +146,7 @@ app.post("/signup", async (c) => {
     const { data, error } = await supabase.auth.signUp(signUpData);
 
     if (error) {
+      console.log("error :>> ", error);
       throw new HTTPException(400, { message: error.message });
     }
 
@@ -151,11 +162,6 @@ app.post("/signup", async (c) => {
     throw new HTTPException(400, { message });
   }
 });
-function parseMessage(error: unknown) {
-  return typeof error === "object" && error !== null && "message" in error
-    ? (error as { message: string }).message
-    : String(error);
-}
 
 // Login con email + password
 app.post("/login", async (c) => {
@@ -274,62 +280,6 @@ app.get("/verify", async (c) => {
   }
 });
 
-// Validazione e refresh combinati (per il Bot)
-app.post("/session/validate-and-refresh", async (c) => {
-  try {
-    const { access_token, refresh_token } = await c.req.json();
-
-    if (!access_token) {
-      throw new HTTPException(400, { message: "Missing access_token" });
-    }
-
-    // Prima prova a validare l'access token
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      access_token,
-    );
-
-    if (!userError && user) {
-      return c.json({
-        valid: true,
-        user: user,
-        token: access_token,
-        refreshed: false,
-      });
-    }
-
-    // Se access token non valido, prova refresh
-    if (!refresh_token) {
-      throw new HTTPException(401, {
-        message: "Token invalid and no refresh_token provided",
-      });
-    }
-
-    const { data: refreshData, error: refreshError } = await supabase.auth
-      .refreshSession({
-        refresh_token,
-      });
-
-    if (refreshError || !refreshData.session) {
-      throw new HTTPException(401, {
-        message: "Token invalid and refresh failed",
-      });
-    }
-
-    return c.json({
-      valid: true,
-      user: refreshData.user,
-      token: refreshData.session.access_token,
-      refresh_token: refreshData.session.refresh_token,
-      expires_at: refreshData.session.expires_at,
-      refreshed: true,
-    });
-  } catch (error) {
-    if (error instanceof HTTPException) throw error;
-    const message = parseMessage(error);
-    throw new HTTPException(400, { message });
-  }
-});
-
 // ==========================================
 // USER PROFILE MANAGEMENT
 // ==========================================
@@ -428,7 +378,8 @@ app.post("/update-password", requireAuth, async (c) => {
 
     if (!validatePassword(password)) {
       throw new HTTPException(400, {
-        message: "Password must be at least 6 characters long",
+        message:
+          "Password must be at least 8 characters with uppercase, lowercase, digit, and special character",
       });
     }
 
@@ -439,172 +390,6 @@ app.post("/update-password", requireAuth, async (c) => {
     }
 
     return c.json({ message: "Password updated successfully" });
-  } catch (error) {
-    if (error instanceof HTTPException) throw error;
-    const message = parseMessage(error);
-    throw new HTTPException(400, { message });
-  }
-});
-
-// ==========================================
-// TELEGRAM INTEGRATION
-// ==========================================
-
-// Link Telegram account (chiamato dal frontend dopo login)
-app.post("/link-telegram", requireAuth, async (c: CustomContext) => {
-  try {
-    const { telegram_id, telegram_username } = await c.req.json();
-
-    if (!telegram_id || typeof telegram_id !== "number") {
-      throw new HTTPException(400, {
-        message: "Missing or invalid telegram_id",
-      });
-    }
-
-    // Aggiorna metadata utente con info Telegram
-    const updateData = {
-      telegram_id: telegram_id.toString(),
-      telegram_username: "",
-    };
-
-    if (telegram_username) {
-      updateData.telegram_username = telegram_username;
-    }
-
-    const { data, error } = await supabase.auth.updateUser({
-      data: updateData,
-    });
-
-    if (error) {
-      throw new HTTPException(400, { message: error.message });
-    }
-
-    return c.json({
-      message: "Telegram account linked successfully",
-      user: data.user,
-      telegram_id: telegram_id,
-    });
-  } catch (error) {
-    if (error instanceof HTTPException) throw error;
-    const message = parseMessage(error);
-    throw new HTTPException(400, { message });
-  }
-});
-
-// Get user by Telegram ID (per servizi interni)
-app.get("/user-by-telegram/:telegram_id", async (c) => {
-  try {
-    const telegram_id = c.req.param("telegram_id");
-    const serviceKey = c.req.header("X-Service-Key");
-
-    // Verifica che la richiesta venga da un servizio autorizzato
-    const expectedServiceKey = Deno.env.get("INTERNAL_SERVICE_KEY");
-    if (!serviceKey || serviceKey !== expectedServiceKey) {
-      throw new HTTPException(401, { message: "Unauthorized service" });
-    }
-
-    if (!telegram_id) {
-      throw new HTTPException(400, { message: "Missing telegram_id" });
-    }
-
-    // Query users tramite Supabase Admin API
-    const { data, error } = await supabase.auth.admin.listUsers();
-
-    if (error) {
-      throw new HTTPException(500, { message: "Failed to query users" });
-    }
-
-    const user = data.users.find((u) =>
-      u.user_metadata?.telegram_id === telegram_id
-    );
-
-    if (!user) {
-      throw new HTTPException(404, { message: "User not found" });
-    }
-
-    return c.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        user_metadata: user.user_metadata,
-        created_at: user.created_at,
-      },
-      supabase_user_id: user.id,
-      telegram_id: telegram_id,
-    });
-  } catch (error) {
-    if (error instanceof HTTPException) throw error;
-    const message = parseMessage(error);
-    throw new HTTPException(500, { message });
-  }
-});
-
-// Endpoint per il Bot - verifica token e associa telegram_id
-app.post("/bot/verify-and-link", async (c) => {
-  try {
-    const { access_token, refresh_token, telegram_id } = await c.req.json();
-    const serviceKey = c.req.header("X-Service-Key");
-
-    // Verifica service key
-    const expectedServiceKey = Deno.env.get("INTERNAL_SERVICE_KEY");
-    if (!serviceKey || serviceKey !== expectedServiceKey) {
-      throw new HTTPException(401, { message: "Unauthorized service" });
-    }
-
-    if (!access_token || !telegram_id) {
-      throw new HTTPException(400, {
-        message: "Missing access_token or telegram_id",
-      });
-    }
-
-    // Verifica access token
-    let { data: { user }, error } = await supabase.auth.getUser(access_token);
-    let currentToken = access_token;
-    let refreshed = false;
-
-    // Se token non valido, prova refresh
-    if (error && refresh_token) {
-      const { data: refreshData, error: refreshError } = await supabase.auth
-        .refreshSession({
-          refresh_token,
-        });
-
-      if (!refreshError && refreshData.session) {
-        user = refreshData.user;
-        currentToken = refreshData.session.access_token;
-        refreshed = true;
-        error = null;
-      }
-    }
-
-    if (error || !user) {
-      throw new HTTPException(401, { message: "Invalid or expired tokens" });
-    }
-
-    // Se l'utente non ha telegram_id, aggiungilo
-    if (!user.user_metadata?.telegram_id) {
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        user.id,
-        {
-          user_metadata: {
-            ...user.user_metadata,
-            telegram_id: telegram_id.toString(),
-          },
-        },
-      );
-
-      if (updateError) {
-        console.error("Failed to link telegram_id:", updateError);
-      }
-    }
-
-    return c.json({
-      valid: true,
-      user: user,
-      token: currentToken,
-      refreshed: refreshed,
-      telegram_linked: true,
-    });
   } catch (error) {
     if (error instanceof HTTPException) throw error;
     const message = parseMessage(error);
