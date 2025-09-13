@@ -1,6 +1,7 @@
-import { Telegraf } from "telegraf";
+import { session, Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
 import { handleMessage } from "./handlers.js";
+import { initDb } from "./db.js";
 
 const botToken = process.env.BOT_TOKEN;
 if (!botToken) {
@@ -12,8 +13,16 @@ if (!botToken) {
 
 const bot = new Telegraf(botToken);
 
+bot.use(session());
+
+bot.use((ctx, next) => {
+    if (!ctx.session) ctx.session = {};
+    return next();
+});
+
 bot.on(message("text"), handleMessage);
 
 bot.launch(() => {
+    initDb();
     console.log("Bot started!");
 });
