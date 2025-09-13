@@ -1,10 +1,7 @@
 import { PageProps } from "$fresh/server.ts";
+import { passwordRegex } from "../../utils/regexes.ts";
 import { handler } from "./handler.ts";
 import { Props } from "./types.ts";
-
-export const passwordRegex = new RegExp(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-);
 
 export { handler };
 
@@ -45,6 +42,7 @@ export default function Login(props: PageProps<Props>) {
           action="/login"
           className="flex flex-col gap-4"
         >
+          <input type="hidden" name="mode" value={mode} />
           <input
             type="text"
             name="email"
