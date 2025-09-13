@@ -29,7 +29,9 @@ export const handler: Handlers<Props> = {
     const mode = url.searchParams.get("mode") === "register"
       ? "register"
       : "login";
-    return ctx.render({ mode });
+    const telegramId = url.searchParams.get("telegram_id") || undefined;
+    const telegramUsername = url.searchParams.get("username") || undefined;
+    return ctx.render({ mode, telegramId, telegramUsername });
   },
 
   async POST(req) {
@@ -59,6 +61,14 @@ export const handler: Handlers<Props> = {
 
       try {
         if (mode === "register") {
+          const telegramId = form.get("telegram_id")?.toString() || "";
+          const telegramUsername = form.get("username")?.toString() || "";
+          const metadata: Record<string, string> = {};
+          if (telegramId && telegramUsername) {
+            metadata.telegram_id = telegramId;
+            metadata.username = telegramUsername;
+          }
+
           // Register new user via auth-service
           const response = await fetch(`${authServiceUrl}/signup`, {
             method: "POST",
@@ -68,6 +78,7 @@ export const handler: Handlers<Props> = {
             body: JSON.stringify({
               email,
               password,
+              ...(Object.keys(metadata)?.length ? { metadata } : {}),
             }),
           });
 
@@ -78,6 +89,37 @@ export const handler: Handlers<Props> = {
               result.error || "Registration failed",
               response.status,
             );
+          }
+
+          // After successful registration, notify Telegram bot if session is available
+          if (
+            !result.needsEmailConfirmation && telegramId && telegramUsername
+          ) {
+            try {
+              const botResponse = await fetch(
+                "http://telegram-bot:8001/user-registered",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    telegramId,
+                    username: telegramUsername,
+                    supabaseUserId: result.user.id,
+                    refresh_token: result.session?.refresh_token,
+                  }),
+                },
+              );
+              if (!botResponse.ok) {
+                console.error(
+                  "Failed to notify Telegram bot:",
+                  await botResponse.text(),
+                );
+              }
+            } catch (botError) {
+              console.error("Error notifying Telegram bot:", botError);
+            }
           }
 
           return createJsonResponse(

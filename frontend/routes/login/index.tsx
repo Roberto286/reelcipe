@@ -43,6 +43,20 @@ export default function Login(props: PageProps<Props>) {
           className="flex flex-col gap-4"
         >
           <input type="hidden" name="mode" value={mode} />
+          {props.data?.telegramId && (
+            <input
+              type="hidden"
+              name="telegram_id"
+              value={props.data.telegramId}
+            />
+          )}
+          {props.data?.telegramUsername && (
+            <input
+              type="hidden"
+              name="username"
+              value={props.data.telegramUsername}
+            />
+          )}
           <input
             type="text"
             name="email"

@@ -76,9 +76,14 @@ async function handleAuthentication(ctx) {
 }
 
 async function inviteToLogin(ctx) {
+    const telegramId = ctx.from.id;
+    const username = ctx.from.username || "";
+    const loginUrl =
+        `${OPENRECIPE_FE_BASEURL}/login?telegram_id=${telegramId}&username=${username}`;
+
     if (OPENRECIPE_FE_BASEURL.startsWith("http://")) {
         await ctx.reply(
-            `Accedi al servizio: ${OPENRECIPE_FE_BASEURL}/login`,
+            `Accedi al servizio: ${loginUrl}`,
         );
     } else {
         await ctx.reply(
@@ -86,7 +91,7 @@ async function inviteToLogin(ctx) {
             Markup.inlineKeyboard([
                 Markup.button.login(
                     "Accedi con Telegram",
-                    `${OPENRECIPE_FE_BASEURL}/login`,
+                    loginUrl,
                 ),
             ]),
         );
