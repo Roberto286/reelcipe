@@ -3,6 +3,11 @@ import { message } from "telegraf/filters";
 import { handleMessage } from "./handlers.js";
 import { initDb } from "./db.js";
 import express from "express";
+import {
+    createNewUser,
+    findUserByTelegramId,
+    updateUserByTelegramId,
+} from "./db.js";
 
 const botToken = process.env.BOT_TOKEN;
 if (!botToken) {
@@ -27,11 +32,19 @@ const server = express();
 server.use(express.json());
 
 server.post("/user-registered", (req, res) => {
-    const { telegramId, username, supabaseUserId, refresh_token, language } =
-        req.body;
+    const {
+        telegramId,
+        telegram_username,
+        supabaseUserId,
+        access_token,
+        refresh_token,
+        language,
+    } = req.body;
 
     // Validate required fields
-    if (!telegramId || !username || !supabaseUserId || !refresh_token) {
+    if (
+        !telegramId || !telegram_username || !supabaseUserId || !refresh_token
+    ) {
         return res.status(400).send("Missing required fields");
     }
 
@@ -42,8 +55,9 @@ server.post("/user-registered", (req, res) => {
         // Save to DB
         createNewUser({
             telegramId,
-            username,
+            username: telegram_username,
             supabaseUserId,
+            access_token,
             refresh_token,
             language: userLanguage,
         });
@@ -55,9 +69,52 @@ server.post("/user-registered", (req, res) => {
     }
 });
 
-const port = 8001;
-server.listen(port, () => {
-    console.log(`HTTP server listening on port ${port}`);
+server.post("/user-logged-in", (req, res) => {
+    const {
+        telegramId,
+        telegram_username,
+        supabaseUserId,
+        access_token,
+        refresh_token,
+        language,
+    } = req.body;
+    // Validate required fields
+    if (
+        !telegramId || !telegram_username || !supabaseUserId || !refresh_token
+    ) {
+        return res.status(400).send("Missing required fields");
+    }
+
+    // Default language if not provided
+    const userLanguage = language || "it";
+
+    try {
+        // Check if user exists
+        const existingUser = findUserByTelegramId(telegramId);
+        if (existingUser) {
+            // Update existing user
+            updateUserByTelegramId(telegramId, { access_token, refresh_token });
+            res.status(200).send("User tokens updated successfully");
+        } else {
+            // Create new user
+            createNewUser({
+                telegramId,
+                username: telegram_username,
+                supabaseUserId,
+                access_token,
+                refresh_token,
+                language: userLanguage,
+            });
+            res.status(200).send("User created and tokens saved successfully");
+        }
+    } catch (error) {
+        console.error("Database error:", error);
+        res.status(500).send("Internal server error");
+    }
+});
+
+server.listen(8001, () => {
+    console.log(`HTTP server listening on port 8001`);
 });
 
 bot.launch(() => {

@@ -21,6 +21,8 @@ services:
 
   telegram-bot:
     container_name: telegram-bot
+    volumes:
+      - ./telegram-bot/db:/app/db
     build:
       context: ./telegram-bot
       dockerfile: Dockerfile
@@ -32,8 +34,8 @@ services:
     command: pnpm start
     develop:
       watch:
-        - path: ./telegram-bot
-          target: /app
+        - path: ./telegram-bot/src
+          target: /app/src
           action: sync+restart
 
   recipe-generator:

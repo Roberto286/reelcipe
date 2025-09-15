@@ -1,7 +1,9 @@
 import { isUrl } from "./functions.js";
 import { Markup } from "telegraf";
 import { OPENRECIPE_FE_BASEURL, RECIPE_GENERATOR_BASE_URL } from "./config.js";
-import { findUserByTelegramId } from "./db.js";
+import { findUserByTelegramId, updateUserByTelegramId } from "./db.js";
+
+const AUTH_SERVICE_URL = "http://auth-service:8000";
 
 export async function handleMessage(ctx) {
     const isAuthenticated = await handleAuthentication(ctx);
@@ -66,20 +68,98 @@ async function handleCommand(ctx, command) {
 }
 
 async function handleAuthentication(ctx) {
-    if (ctx.session.access_token) {
-        await fetch();
+    const telegramId = ctx.from.id.toString();
+    const user = findUserByTelegramId(telegramId);
+    console.log("🚀 ~ handleAuthentication ~ user:", user);
+    if (!user) {
+        return false;
     }
-    const user = findUserByTelegramId(ctx.from.id);
-    console.log("user :>> ", user);
 
-    return !!user;
+    let accessToken = ctx.session?.access_token;
+    if (!accessToken && user.access_token) {
+        ctx.session.access_token = user.access_token;
+        accessToken = user.access_token;
+    }
+    console.log("accessToken :>> ", accessToken);
+
+    let isValid = false;
+
+    if (accessToken) {
+        // Validate access_token
+        try {
+            const response = await fetch(
+                `${AUTH_SERVICE_URL}/session/validate-and-refresh`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        access_token: accessToken,
+                    }),
+                },
+            );
+
+            if (response.ok) {
+                isValid = true;
+                console.log("Access token valid");
+            } else {
+                console.log("Access token invalid or expired");
+            }
+        } catch (error) {
+            console.error("Error validating access token:", error);
+        }
+    }
+
+    if (!isValid && user.refresh_token) {
+        // Try to refresh using refresh_token
+        try {
+            const refreshResponse = await fetch(
+                `${AUTH_SERVICE_URL}/session/validate-and-refresh`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        refresh_token: user.refresh_token,
+                    }),
+                },
+            );
+
+            console.log("refreshResponse :>> ", await refreshResponse.json());
+
+            if (refreshResponse.ok) {
+                const { access_token, refresh_token } = await refreshResponse
+                    .json();
+                // Update session with new access_token
+                ctx.session.access_token = access_token;
+                // Update DB with new tokens
+                updateUserByTelegramId(telegramId, {
+                    access_token,
+                    refresh_token,
+                });
+                isValid = true;
+                console.log("Token refreshed successfully");
+            } else {
+                console.log("Refresh token invalid");
+                // Optionally clear invalid tokens from DB
+                // updateUserByTelegramId(telegramId, { access_token: null, refresh_token: null });
+            }
+        } catch (error) {
+            console.error("Error refreshing token:", error);
+        }
+    }
+
+    if (!isValid) {
+        delete ctx.session.access_token;
+    }
+
+    return isValid;
 }
 
 async function inviteToLogin(ctx) {
     const telegramId = ctx.from.id;
     const username = ctx.from.username || "";
     const loginUrl =
-        `${OPENRECIPE_FE_BASEURL}/login?telegram_id=${telegramId}&username=${username}`;
+        `${OPENRECIPE_FE_BASEURL}/login?telegram_id=${telegramId}&telegram_username=${username}`;
 
     if (OPENRECIPE_FE_BASEURL.startsWith("http://")) {
         await ctx.reply(
