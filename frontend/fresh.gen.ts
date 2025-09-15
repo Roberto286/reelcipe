@@ -8,7 +8,7 @@ import * as $index from "./routes/index.tsx";
 import * as $login_handler from "./routes/login/handler.ts";
 import * as $login_index from "./routes/login/index.tsx";
 import * as $login_types from "./routes/login/types.ts";
-
+import * as $Counter from "./islands/Counter.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -20,7 +20,9 @@ const manifest = {
     "./routes/login/index.tsx": $login_index,
     "./routes/login/types.ts": $login_types,
   },
-  islands: {},
+  islands: {
+    "./islands/Counter.tsx": $Counter,
+  },
   baseUrl: import.meta.url,
 } satisfies Manifest;
 

@@ -1,4 +1,6 @@
 import { PageProps } from "$fresh/server.ts";
+import { Button } from "../../components/button.tsx";
+import { appendQueryParams } from "../../utils/http.ts";
 import { passwordRegex } from "../../utils/regexes.ts";
 import { handler } from "./handler.ts";
 import { Props } from "./types.ts";
@@ -7,16 +9,38 @@ export { handler };
 
 export default function Login(props: PageProps<Props>) {
   const mode = props.data?.mode ?? "login";
+  const telegramId = props.data.telegramId;
+  const telegramUsername = props.data.telegramUsername;
+
+  const getRedirectUrl = (mode: string) =>
+    appendQueryParams("/login", {
+      mode,
+      telegram_id: telegramId,
+      telegram_username: telegramUsername,
+    });
 
   return (
-    <section className="flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded-2xl shadow-lg">
+    <section className="w-1/2 bg-secondary">
+      <div className="w-full">
         <h1 className="text-2xl font-bold text-center mb-4">Benvenuto</h1>
         <div>
-          {/* Tabs */}
-          <div className="flex justify-center mb-4">
+          <div role="tablist" className="tabs tabs-box">
+            <a role="tab" className="tab" href={getRedirectUrl("login")}>
+              Login
+            </a>
             <a
-              href="/login?mode=login"
+              role="tab"
+              className="tab tab-active"
+              href={getRedirectUrl("register")}
+            >
+              Registrati
+            </a>
+          </div>
+          {/* Tabs */}
+          {
+            /* <div className="flex justify-center mb-4">
+            <a
+              href={getRedirectUrl("login")}
               className={`px-4 py-2 ${
                 mode === "login"
                   ? "border-b-2 border-blue-500 font-semibold"
@@ -26,7 +50,7 @@ export default function Login(props: PageProps<Props>) {
               Login
             </a>
             <a
-              href="/login?mode=register"
+              href={getRedirectUrl("register")}
               className={`px-4 py-2 ${
                 mode === "register"
                   ? "border-b-2 border-blue-500 font-semibold"
@@ -35,7 +59,8 @@ export default function Login(props: PageProps<Props>) {
             >
               Registrati
             </a>
-          </div>
+          </div> */
+          }
         </div>
         <form
           method="POST"
@@ -86,12 +111,7 @@ export default function Login(props: PageProps<Props>) {
             />
           )}
 
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-2"
-          >
-            {mode === "login" ? "Accedi" : "Registrati"}
-          </button>
+          <Button type="submit">REGISTRATI</Button>
         </form>
       </div>
     </section>
