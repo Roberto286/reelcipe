@@ -1,6 +1,17 @@
-import { JSX } from "preact";
-import { IS_BROWSER } from "$fresh/runtime.ts";
+import type { ComponentChildren } from "preact";
 
-export function Button(props: JSX.HTMLAttributes<HTMLButtonElement>) {
-  return <button className="btn btn-primary">Default</button>;
+export interface ButtonProps {
+  id?: string;
+  onClick?: () => void;
+  children?: ComponentChildren;
+  disabled?: boolean;
+}
+
+export function Button(props: ButtonProps) {
+  return (
+    <button
+      {...props}
+      class="btn btn-primary"
+    />
+  );
 }

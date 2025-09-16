@@ -11,5 +11,5 @@ RUN deno cache main.ts
 # Poi copia il resto del codice
 COPY . .
 
-EXPOSE 8000
-CMD ["deno", "task", "start"]
+EXPOSE 5173
+CMD ["deno", "task", "dev"]

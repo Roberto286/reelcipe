@@ -1,6 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { createJsonResponse } from "../../utils/http.ts";
-import { emailRegex, passwordRegex } from "../../utils/regexes.ts";
+import { createJsonResponse, emailRegex, passwordRegex } from "../../utils.ts";
 
 import { Props } from "./types.ts";
 

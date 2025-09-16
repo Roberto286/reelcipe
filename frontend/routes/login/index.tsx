@@ -1,7 +1,7 @@
 import { PageProps } from "$fresh/server.ts";
-import { Button } from "../../components/button.tsx";
-import { appendQueryParams } from "../../utils/http.ts";
-import { passwordRegex } from "../../utils/regexes.ts";
+import { Button } from "../../components/Button.tsx";
+
+import { appendQueryParams, passwordRegex } from "../../utils.ts";
 import { handler } from "./handler.ts";
 import { Props } from "./types.ts";
 
