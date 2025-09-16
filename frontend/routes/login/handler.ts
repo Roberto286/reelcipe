@@ -1,7 +1,9 @@
-import { Handlers } from "$fresh/server.ts";
-import { createJsonResponse, emailRegex, passwordRegex } from "../../utils.ts";
-
-import { Props } from "./types.ts";
+import {
+  createJsonResponse,
+  define,
+  emailRegex,
+  passwordRegex,
+} from "../../utils.ts";
 
 // Response messages (can be internationalized later)
 const MESSAGES = {
@@ -22,8 +24,11 @@ function validatePassword(password: string): boolean {
   return passwordRegex.test(password);
 }
 
-export const handler: Handlers<Props> = {
+export const handler = define.handlers({
   GET(req, ctx) {
+    console.log("so entrato");
+
+    console.log("req,ctx :>> ", req, ctx);
     const url = new URL(req.url);
     const mode = url.searchParams.get("mode") === "register"
       ? "register"
@@ -31,6 +36,7 @@ export const handler: Handlers<Props> = {
     const telegramId = url.searchParams.get("telegram_id") || undefined;
     const telegramUsername = url.searchParams.get("telegram_username") ||
       undefined;
+    console.log("ctx :>> ", ctx);
     return ctx.render({
       mode,
       telegramId,
@@ -209,4 +215,4 @@ export const handler: Handlers<Props> = {
       return createJsonResponse(MESSAGES.SERVER_ERROR, 500);
     }
   },
-};
+});
