@@ -13,4 +13,5 @@ COPY . .
 RUN deno cache main.ts
 
 EXPOSE 5173
-CMD ["deno", "task", "dev"]
+EXPOSE 9229
+CMD ["deno", "task", "inspect"]

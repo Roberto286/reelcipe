@@ -8,4 +8,4 @@ COPY .env .
 
 RUN npm install
 COPY src src
-CMD ["pnpm", "start"]
+CMD ["pnpm", "inspect"]

@@ -14,3 +14,7 @@ _fresh
 .vscode/
 
 **/.env
+
+.vite
+.zed
+**/vite.config.ts.*

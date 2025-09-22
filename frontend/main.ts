@@ -14,7 +14,7 @@ app.use(async (ctx) => {
 app.get("/api2/:name", (ctx) => {
   const name = ctx.params.name;
   return new Response(
-    `Hello, ${name.charAt(0).toUpperCase() + name.slice(1)}!`,
+    `Hello, ${name.charAt(0).toUpperCase() + name.slice(1)}!`
   );
 });
 

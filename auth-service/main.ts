@@ -6,7 +6,7 @@ import { createClient, User } from "jsr:@supabase/supabase-js@2";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_ANON_KEY")!,
+  Deno.env.get("SUPABASE_ANON_KEY")!
 );
 
 const app = new Hono();
@@ -23,7 +23,7 @@ app.use(
     origin: "*",
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 // Utility functions
@@ -94,11 +94,14 @@ app.get("/health", async (c) => {
     const { error } = await supabase.auth.getSession();
 
     if (error) {
-      return c.json({
-        status: "unhealthy",
-        error: "Cannot connect to Supabase",
-        timestamp: new Date().toISOString(),
-      }, 503);
+      return c.json(
+        {
+          status: "unhealthy",
+          error: "Cannot connect to Supabase",
+          timestamp: new Date().toISOString(),
+        },
+        503
+      );
     }
 
     return c.json({
@@ -109,11 +112,14 @@ app.get("/health", async (c) => {
     });
   } catch (error) {
     console.log(error);
-    return c.json({
-      status: "unhealthy",
-      error: "Service error",
-      timestamp: new Date().toISOString(),
-    }, 503);
+    return c.json(
+      {
+        status: "unhealthy",
+        error: "Service error",
+        timestamp: new Date().toISOString(),
+      },
+      503
+    );
   }
 });
 
@@ -150,12 +156,15 @@ app.post("/signup", async (c) => {
       throw new HTTPException(400, { message: error.message });
     }
 
-    return c.json({
-      message: "User created successfully",
-      user: data.user,
-      session: data.session,
-      needsEmailConfirmation: !data.session,
-    }, 201);
+    return c.json(
+      {
+        message: "User created successfully",
+        user: data.user,
+        session: data.session,
+        needsEmailConfirmation: !data.session,
+      },
+      201
+    );
   } catch (error) {
     if (error instanceof HTTPException) throw error;
     const message = parseMessage(error);
@@ -261,7 +270,10 @@ app.get("/verify", async (c) => {
       });
     }
 
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
 
     if (error || !user) {
       throw new HTTPException(401, {
@@ -411,9 +423,10 @@ app.post("/session/validate-and-refresh", async (c) => {
     }
 
     // Prima prova a validare l'access token
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      access_token,
-    );
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(access_token);
 
     if (!userError && user) {
       return c.json({
@@ -431,8 +444,8 @@ app.post("/session/validate-and-refresh", async (c) => {
       });
     }
 
-    const { data: refreshData, error: refreshError } = await supabase.auth
-      .refreshSession({
+    const { data: refreshData, error: refreshError } =
+      await supabase.auth.refreshSession({
         refresh_token,
       });
 
@@ -476,8 +489,8 @@ app.delete("/session/telegram/:telegram_id", async (c) => {
       throw new HTTPException(500, { message: "Failed to query users" });
     }
 
-    const user = data.users.find((u) =>
-      u.user_metadata?.telegram_id === telegram_id
+    const user = data.users.find(
+      (u) => u.user_metadata?.telegram_id === telegram_id
     );
 
     if (!user) {
@@ -509,26 +522,35 @@ app.delete("/session/telegram/:telegram_id", async (c) => {
 
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
-    return c.json({
-      error: err.message,
-      status: err.status,
-      timestamp: new Date().toISOString(),
-    }, err.status);
+    return c.json(
+      {
+        error: err.message,
+        status: err.status,
+        timestamp: new Date().toISOString(),
+      },
+      err.status
+    );
   }
 
   console.error("Unhandled error:", err);
-  return c.json({
-    error: "Internal server error",
-    timestamp: new Date().toISOString(),
-  }, 500);
+  return c.json(
+    {
+      error: "Internal server error",
+      timestamp: new Date().toISOString(),
+    },
+    500
+  );
 });
 
 app.notFound((c) => {
-  return c.json({
-    error: "Endpoint not found",
-    path: c.req.path,
-    method: c.req.method,
-  }, 404);
+  return c.json(
+    {
+      error: "Endpoint not found",
+      path: c.req.path,
+      method: c.req.method,
+    },
+    404
+  );
 });
 
 // Start server

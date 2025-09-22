@@ -1,0 +1,49 @@
+services:
+  frontend:
+    environment:
+      DENO_ENV: development
+    ports:
+      - "3500:5173"
+      - "9229:9229" # Deno inspector per Zed
+    develop:
+      watch:
+        - path: ./frontend
+          target: /app
+          action: sync+restart
+
+  telegram-bot:
+    environment:
+      NODE_ENV: development
+    ports:
+      - "9231:9231" # Node inspector
+    develop:
+      watch:
+        - path: ./telegram-bot/src
+          target: /app/src
+          action: sync+restart
+
+  recipe-generator:
+    environment:
+      NODE_ENV: development
+    ports:
+      - "7823:8000"
+      - "9232:9232" # Node inspector
+    develop:
+      watch:
+        - path: ./recipe-generator
+          target: /app
+          action: sync+restart
+
+  auth-service:
+    environment:
+      DENO_ENV: development
+    # Sostituisci /app/main.ts se usi un file differente
+    command: "deno task inspect"
+    ports:
+      - "3569:8000"
+      - "9230:9230" # Deno inspector
+    develop:
+      watch:
+        - path: ./auth-service
+          target: /app
+          action: sync+restart

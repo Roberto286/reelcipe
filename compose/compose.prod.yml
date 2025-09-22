@@ -1,0 +1,27 @@
+services:
+  frontend:
+    environment:
+      DENO_ENV: production
+    command: sh -lc "deno task start || deno run -A /app/main.ts"
+    restart: unless-stopped
+
+  telegram-bot:
+    environment:
+      NODE_ENV: production
+    # Se hai uno script build e uno start:prod, attivalo qui:
+    # command: sh -lc "pnpm -s build && pnpm -s start:prod"
+    command: pnpm start
+    restart: unless-stopped
+
+  recipe-generator:
+    environment:
+      NODE_ENV: production
+    # Esempio alternativo:
+    # command: sh -lc "pnpm -s build && node dist/index.js"
+    restart: unless-stopped
+
+  auth-service:
+    environment:
+      DENO_ENV: production
+    command: sh -lc "deno task start || deno run -A /app/main.ts"
+    restart: unless-stopped

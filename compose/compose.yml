@@ -1,59 +1,42 @@
 include:
-  - path: ./backend/docker-compose.yml
+  - path: ../backend/docker-compose.yml
 
 services:
   frontend:
     container_name: frontend
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     ports:
       - "3500:5173"
-    environment:
-      - DENO_ENV=production
+      - "9229:9229"
+    environment: {} # DENO_ENV verrà impostato negli override
     networks:
       - default
-    develop:
-      watch:
-        - path: ./frontend
-          target: /app
-          action: sync+restart
 
   telegram-bot:
     container_name: telegram-bot
     volumes:
-      - ./telegram-bot/db:/app/db
+      - ../telegram-bot/db:/app/db
     build:
-      context: ./telegram-bot
+      context: ../telegram-bot
       dockerfile: Dockerfile
     environment:
-      NODE_ENV: development
       RUNNER: docker
+      # NODE_ENV verrà impostato negli override
     networks:
       - default
-    command: pnpm start
-    develop:
-      watch:
-        - path: ./telegram-bot/src
-          target: /app/src
-          action: sync+restart
 
   recipe-generator:
     container_name: recipe-generator
     build:
-      context: ./recipe-generator
+      context: ../recipe-generator
       dockerfile: Dockerfile
-    environment:
-      - NODE_ENV=development
+    environment: {}
     ports:
       - "7823:8000"
     networks:
       - default
-    develop:
-      watch:
-        - path: ./recipe-generator
-          target: /app
-          action: sync+restart
 
   auth-service:
     container_name: auth-service
@@ -68,17 +51,16 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    develop:
-      watch:
-        - path: ./auth-service
-          target: /app
-          action: sync+restart
     build:
-      context: ./auth-service
+      context: ../auth-service
       dockerfile: Dockerfile
     ports:
       - "3569:8000"
     env_file:
-      - ./auth-service/.env
+      - ../auth-service/.env
     networks:
       - default
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-openrecipes}_default
