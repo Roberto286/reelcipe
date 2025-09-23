@@ -7,7 +7,7 @@ services:
       - "9229:9229" # Deno inspector per Zed
     develop:
       watch:
-        - path: ./frontend
+        - path: ../frontend
           target: /app
           action: sync+restart
 
@@ -18,7 +18,7 @@ services:
       - "9231:9231" # Node inspector
     develop:
       watch:
-        - path: ./telegram-bot/src
+        - path: ../telegram-bot/src
           target: /app/src
           action: sync+restart
 
@@ -30,7 +30,7 @@ services:
       - "9232:9232" # Node inspector
     develop:
       watch:
-        - path: ./recipe-generator
+        - path: ../recipe-generator
           target: /app
           action: sync+restart
 
@@ -44,6 +44,6 @@ services:
       - "9230:9230" # Deno inspector
     develop:
       watch:
-        - path: ./auth-service
+        - path: ../auth-service
           target: /app
           action: sync+restart
