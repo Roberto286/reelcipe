@@ -1,5 +1,6 @@
 import { App, cors, staticFiles } from "fresh";
 import { define, type State } from "./utils.ts";
+import { getCookies } from "jsr:@std/http/cookie";
 
 export const app = new App<State>();
 
@@ -23,7 +24,16 @@ const exampleLoggerMiddleware = define.middleware((ctx) => {
   console.log(`${ctx.req.method} ${ctx.req.url}`);
   return ctx.next();
 });
+
+const themeMiddleware = define.middleware((ctx) => {
+  const { theme } = getCookies(ctx.req.headers);
+  ctx.state.theme = theme;
+
+  return ctx.next();
+});
+
 app.use(exampleLoggerMiddleware);
+app.use(themeMiddleware);
 
 // Include file-system based routes here
 app.fsRoutes();

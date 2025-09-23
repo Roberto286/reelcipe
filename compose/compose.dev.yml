@@ -9,7 +9,7 @@ services:
       watch:
         - path: ../frontend
           target: /app
-          action: sync+restart
+          action: sync
 
   telegram-bot:
     environment:

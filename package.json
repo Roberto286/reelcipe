@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start:dev": "COMPOSE_PROFILES=dev docker compose -f compose/compose.yml -f compose/compose.dev.yml up -d",
+    "start:dev": "COMPOSE_PROFILES=dev docker compose -f compose/compose.yml -f compose/compose.dev.yml watch",
     "start:prod": "docker compose -f compose/compose.yml -f compose/compose.prod.yml up -d --remove-orphans",
     "down": "docker compose -f compose/compose.yml down --remove-orphans",
     "nuke": "docker compose -f compose/compose.yml down --remove-orphans --volumes --rmi local",
