@@ -11,7 +11,11 @@ export const MESSAGES = {
 };
 
 const getRedirectUrl = (
-  { mode, telegramId, telegramUsername },
+  { mode, telegramId, telegramUsername }: {
+    mode: string;
+    telegramId: string;
+    telegramUsername: string;
+  },
 ) =>
   appendQueryParams("/login", {
     mode,
