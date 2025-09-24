@@ -6,6 +6,8 @@ export const app = new App<State>();
 
 app.use(staticFiles());
 
+app.use(cors());
+
 // Pass a shared value from a middleware
 app.use(async (ctx) => {
   ctx.state.shared = "hello";
