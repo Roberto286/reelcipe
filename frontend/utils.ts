@@ -5,6 +5,8 @@ import { createDefine } from "fresh";
 export interface State {
   theme: string;
   shared: string;
+  authenticated?: boolean;
+  user?: { id: string; [key: string]: unknown };
 }
 
 export const define = createDefine<State>();
@@ -19,6 +21,12 @@ export function createJsonResponse(
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+export function isSecureReq(req: Request) {
+  // Dietro proxy usa x-forwarded-proto; in locale è http
+  const xfProto = req.headers.get("x-forwarded-proto");
+  return xfProto === "https" || new URL(req.url).protocol === "https:";
 }
 
 export function appendQueryParams(

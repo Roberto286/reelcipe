@@ -1,5 +1,4 @@
 import { define } from "../utils.ts";
-import ThemeToggle from "../islands/theme-toggle.tsx";
 import { Head } from "fresh/runtime";
 
 export default define.page(function Home(ctx) {
@@ -8,7 +7,6 @@ export default define.page(function Home(ctx) {
       <Head>
         <title>Fresh counter</title>
       </Head>
-      <ThemeToggle />
     </div>
   );
 });

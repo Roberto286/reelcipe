@@ -1,8 +1,10 @@
+import { setCookie } from "jsr:@std/http/cookie";
 import {
   appendQueryParams,
   createJsonResponse,
   define,
   emailRegex,
+  isSecureReq,
   passwordRegex,
 } from "../utils.ts";
 
@@ -193,16 +195,34 @@ export const handler = define.handlers({
             }
           }
 
-          return createJsonResponse(
-            result.message || MESSAGES.LOGIN_SUCCESS,
-            response.status,
-            {
-              user: result.user,
-              access_token: result.access_token,
-              refresh_token: result.refresh_token,
-              expires_at: result.expires_at,
-            },
-          );
+          const { access_token, refresh_token } = result;
+          const accessTtlSec = 15 * 60;
+          const refreshTtlSec = 30 * 24 * 60 * 60;
+
+          const headers = new Headers();
+          const secure = isSecureReq(ctx.req);
+
+          setCookie(headers, {
+            name: "access_token",
+            value: access_token,
+            path: "/",
+            httpOnly: true,
+            sameSite: "Lax",
+            secure,
+            maxAge: accessTtlSec,
+          });
+          setCookie(headers, {
+            name: "refresh_token",
+            value: refresh_token,
+            path: "/",
+            httpOnly: true,
+            sameSite: "Strict",
+            secure,
+            maxAge: refreshTtlSec,
+          });
+
+          headers.set("Location", "/dashboard");
+          return new Response(null, { status: 303, headers });
         }
       } catch (networkError) {
         console.error("Auth service error:", networkError);
