@@ -25,16 +25,6 @@ http
       return sendNotFound(res, req.url);
     }
 
-    if (!req.headers.authorization) {
-      return sendUnauthorized(res);
-    }
-
-    const userToken = req.headers.authorization.replace("Bearer ", "");
-
-    if (!userAuthenticated(userToken)) {
-      return sendUnauthorized(res);
-    }
-
     let body;
     try {
       body = await extractBodyFromRequest(req);
@@ -63,7 +53,7 @@ http
         result: {
           data: recipe,
         },
-      }),
+      })
     );
   })
   .listen(PORT, () => {
@@ -81,7 +71,9 @@ function checkEnv() {
   if (notValidVars?.length) {
     console.error(
       `Following environment variables: 
-      ${notValidVars.join("\n ")}\nare required in order to use the program.\nMake sure to set them in your .env file`,
+      ${notValidVars.join(
+        "\n "
+      )}\nare required in order to use the program.\nMake sure to set them in your .env file`
     );
     process.exit(1);
   }
