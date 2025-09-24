@@ -10,7 +10,7 @@ export default define.page(function App({ Component, state }) {
         <title>frontend</title>
       </head>
       <body>
-        <Navbar />
+        <Navbar userAuthenticated={!!state.authenticated} />
         <Component />
       </body>
     </html>

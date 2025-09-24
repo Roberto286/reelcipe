@@ -1,15 +1,12 @@
 import ThemeToggle from "../islands/theme-toggle.tsx";
 import { define } from "../utils.ts";
 
-export type NavbarProps = {};
-
-export const handler = define.handlers({
-  GET(ctx) {
-    return { data: { theme: ctx.state.theme } };
-  },
-});
+export type NavbarProps = {
+  userAuthenticated: boolean;
+};
 
 export default function Navbar(props: NavbarProps) {
+  console.log("props.userAuthenticated :>> ", props.userAuthenticated);
   return (
     <div class="navbar bg-base-100 shadow-sm">
       <div class="navbar-start">
@@ -37,7 +34,9 @@ export default function Navbar(props: NavbarProps) {
       </div>
       <div class="navbar-end">
         <ThemeToggle />
-        <a class="btn" href="/login?mode=login">Login</a>
+        {props.userAuthenticated
+          ? <a class="btn" href="/api/logout?mode=login">Logout</a>
+          : <a class="btn" href="/login?mode=login">Login</a>}
       </div>
     </div>
   );
