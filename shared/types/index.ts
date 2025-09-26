@@ -18,6 +18,7 @@ export type Recipe = {
   imageUrl: string;
   method: Method[];
   tags: Pick<Tag, "id" | "name">[];
+  ingredients: Ingredient[];
   createdAt: string;
 };
 
@@ -56,3 +57,5 @@ export interface GeneratedRecipe {
   }>;
   tags: string[];
 }
+
+export * from "../supabase/index.ts";

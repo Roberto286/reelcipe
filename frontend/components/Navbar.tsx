@@ -28,7 +28,7 @@ export default function Navbar(props: NavbarProps) {
             </svg>
           </div>
         </div>
-        <a class="btn btn-ghost text-xl">Openrecipes</a>
+        <a class="btn btn-ghost text-xl" href="/">Openrecipes</a>
       </div>
       <div class="navbar-center hidden lg:flex">
       </div>
