@@ -6,7 +6,6 @@ export type NavbarProps = {
 };
 
 export default function Navbar(props: NavbarProps) {
-  console.log("props.userAuthenticated :>> ", props.userAuthenticated);
   return (
     <div class="navbar bg-base-100 shadow-sm">
       <div class="navbar-start">

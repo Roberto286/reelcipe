@@ -14,7 +14,6 @@ export default function ThemeToggle() {
     const domTheme = document.documentElement.dataset.theme === "nord"
       ? "nord"
       : "night";
-    console.log("domTheme :>> ", document.documentElement.dataset.theme);
 
     setTheme(domTheme);
   }, []);
