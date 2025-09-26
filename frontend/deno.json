@@ -15,6 +15,7 @@
   },
   "exclude": ["**/_fresh/*"],
   "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.58.0",
     "daisyui": "npm:daisyui@^5.1.12",
     "fresh": "jsr:@fresh/core@^2.1.1",
     "preact": "npm:preact@^10.27.2",
