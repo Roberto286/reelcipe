@@ -8,6 +8,7 @@ import {
 } from "./http/responses.js";
 import { extractBodyFromRequest } from "./lib/extract-body-from-request.js";
 import { startRecipeGeneration } from "./recipe/processor.js";
+import { mockRecipe } from "./mock-recipe.js";
 
 const PORT = process.env.PORT || 3000;
 const REQUIRED_ENV_VARIABLES = ["OPENAI_API_KEY", "SUPABASE_JWT_SECRET"];
@@ -36,6 +37,21 @@ http
     if (!url) {
       return sendBadRequest(res, "'url' is required");
     }
+
+    // Development mode: return mock data
+    if (process.env.NODE_ENV === "development") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({
+          message: "Recipe generated successfully!",
+          result: {
+            data: mockRecipe,
+          },
+        })
+      );
+      return;
+    }
+
     let recipe;
     try {
       recipe = await startRecipeGeneration(url);
