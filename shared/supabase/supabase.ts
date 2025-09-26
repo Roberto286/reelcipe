@@ -99,10 +99,22 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "cookbook_recipe_coockbook_id_fkey";
+            columns: ["cookbook_id"];
+            referencedRelation: "recipe_details_view";
+            referencedColumns: ["cookbook_id"];
+          },
+          {
             foreignKeyName: "cookbook_recipe_cookbook_id_fkey";
             columns: ["cookbook_id"];
             referencedRelation: "cookbook";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "cookbook_recipe_cookbook_id_fkey";
+            columns: ["cookbook_id"];
+            referencedRelation: "recipe_details_view";
+            referencedColumns: ["cookbook_id"];
           },
           {
             foreignKeyName: "cookbook_recipe_recipe_id_fkey";
@@ -290,6 +302,9 @@ export type Database = {
     Views: {
       recipe_details_view: {
         Row: {
+          cookbook_id: number | null;
+          cookbook_name: string | null;
+          created_at: string | null;
           default_serves: number | null;
           downloaded_from: string | null;
           image_url: string | null;
@@ -298,11 +313,11 @@ export type Database = {
           ingredient_quantity: number | null;
           ingredient_unit: string | null;
           method_id: number | null;
+          method_step: number | null;
           method_text: string | null;
           rating: number | null;
           recipe_id: number | null;
           recipe_title: string | null;
-          step_number: number | null;
           tag_id: number | null;
           tag_name: string | null;
           user_id: string | null;

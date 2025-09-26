@@ -15,7 +15,7 @@ export const define = createDefine<State>();
 export function createJsonResponse(
   message: string,
   status: number,
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ) {
   return new Response(JSON.stringify({ message, ...data }), {
     status,
@@ -31,7 +31,7 @@ export function isSecureReq(req: Request) {
 
 export function appendQueryParams(
   url: string,
-  params: Record<string, string | undefined>
+  params: Record<string, string | undefined>,
 ): string {
   const urlObj = new URL(url, "https://example.com"); //just to make it possible to build the url
   Object.entries(params).forEach(([key, value]) => {
@@ -46,7 +46,7 @@ export function appendQueryParams(
 
 // Password validation regex: requires at least 8 characters with uppercase, lowercase, digit, and special character
 export const passwordRegex = new RegExp(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
 );
 
 // Email validation regex (basic)

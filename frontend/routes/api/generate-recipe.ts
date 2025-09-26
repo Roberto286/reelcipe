@@ -1,9 +1,9 @@
 import { define } from "../../utils.ts";
 import {
-  saveGeneratedRecipe,
   createErrorRedirect,
   createSuccessRedirect,
   GeneratedRecipe,
+  saveGeneratedRecipe,
 } from "shared";
 
 export const handler = define.handlers({
@@ -43,7 +43,7 @@ export const handler = define.handlers({
       }
 
       const data = await response.json();
-      console.log("data :>> ", data);
+
       const recipe: GeneratedRecipe = data.result.data;
 
       // Validate recipe data
@@ -55,15 +55,18 @@ export const handler = define.handlers({
         return createErrorRedirect("Invalid recipe data received");
       }
 
-      // Get tokens from cookie
+      // Get tokens and user_id from cookie
       const accessToken = ctx.req.headers
         .get("cookie")
         ?.match(/access_token=([^;]+)/)?.[1];
       const refreshToken = ctx.req.headers
         .get("cookie")
         ?.match(/refresh_token=([^;]+)/)?.[1];
+      const userId = ctx.req.headers
+        .get("cookie")
+        ?.match(/user_id=([^;]+)/)?.[1];
 
-      if (!accessToken) {
+      if (!accessToken || !userId) {
         return createErrorRedirect("Not authenticated");
       }
 
@@ -93,7 +96,8 @@ export const handler = define.handlers({
       const recipeId = await saveGeneratedRecipe(
         recipe,
         url as string,
-        validToken
+        validToken,
+        userId
       );
 
       return createSuccessRedirect(

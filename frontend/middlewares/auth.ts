@@ -23,7 +23,7 @@ export const authMiddleware = define.middleware(async (ctx) => {
           access_token: accessToken,
           refresh_token: refreshToken,
         }),
-      }
+      },
     );
 
     if (response.ok) {

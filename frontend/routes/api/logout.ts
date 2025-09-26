@@ -28,6 +28,17 @@ export const handler = define.handlers({
       maxAge: 0,
     });
 
+    // Clear user_id cookie
+    setCookie(headers, {
+      name: "user_id",
+      value: "",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+      secure,
+      maxAge: 0,
+    });
+
     headers.set("Location", "/");
     return new Response(null, { status: 303, headers });
   },
