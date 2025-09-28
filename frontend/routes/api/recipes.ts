@@ -1,10 +1,5 @@
 import { define } from "../../utils.ts";
-import {
-  createErrorRedirect,
-  createSuccessRedirect,
-  GeneratedRecipe,
-  saveGeneratedRecipe,
-} from "shared";
+import { createErrorRedirect, createSuccessRedirect } from "shared";
 
 export const handler = define.handlers({
   async POST(ctx) {
@@ -19,40 +14,6 @@ export const handler = define.handlers({
             Location: `/?error=${encodeURIComponent("'url' is required")}`,
           },
         });
-      }
-
-      // Generate recipe
-      const response = await fetch("http://recipe-generator:8000/recipe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        return new Response(null, {
-          status: 302,
-          headers: {
-            Location: `/?error=${encodeURIComponent(
-              `Recipe generation failed: ${errorText}`
-            )}`,
-          },
-        });
-      }
-
-      const data = await response.json();
-
-      const recipe: GeneratedRecipe = data.result.data;
-
-      // Validate recipe data
-      if (
-        !recipe.title ||
-        !recipe.defaultServes ||
-        !recipe.ingredients?.length
-      ) {
-        return createErrorRedirect("Invalid recipe data received");
       }
 
       // Get tokens and user_id from cookie
@@ -92,13 +53,35 @@ export const handler = define.handlers({
       const authData = await authResponse.json();
       const validToken = authData.token;
 
-      // Save recipe using shared function
-      const recipeId = await saveGeneratedRecipe(
-        recipe,
-        url as string,
-        validToken,
-        userId
-      );
+      // Generate and save recipe
+      const response = await fetch("http://recipe-generator:8000/recipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+          access_token: validToken,
+          user_id: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: `/?error=${encodeURIComponent(
+              `Recipe generation failed: ${errorText}`
+            )}`,
+          },
+        });
+      }
+
+      const data = await response.json();
+      console.log("data :>> ", data);
+
+      const recipeId = data.result.recipeId;
 
       return createSuccessRedirect(
         "Recipe generated and saved successfully",

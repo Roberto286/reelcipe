@@ -31,11 +31,11 @@ export default function Navbar(props: NavbarProps) {
       </div>
       <div class="navbar-center hidden lg:flex">
       </div>
-      <div class="navbar-end">
+      <div class="navbar-end gap-2 items-end">
         <ThemeToggle />
         {props.userAuthenticated
-          ? <a class="btn" href="/api/logout?mode=login">Logout</a>
-          : <a class="btn" href="/login?mode=login">Login</a>}
+          ? <a class="btn btn-primary" href="/api/logout?mode=login">Logout</a>
+          : <a class="btn btn-primary" href="/login?mode=login">Login</a>}
       </div>
     </div>
   );

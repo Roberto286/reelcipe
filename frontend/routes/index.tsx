@@ -13,7 +13,7 @@ export default define.page(function Home(ctx) {
         <title>Openrecipes</title>
       </Head>
 
-      <form action="/api/generate-recipe" method="post" class="space-y-4">
+      <form action="/api/recipes" method="post" class="space-y-4">
         <div>
           <label for="url" class="label">
             <span class="label-text">Recipe URL</span>

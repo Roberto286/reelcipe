@@ -19,8 +19,8 @@ export const handler = define.handlers({
       // Extract telegram fields for both modes
       const telegramId = form.get("telegram_id")?.toString() || "";
       const telegramUsername = form.get("username")?.toString() || "";
-      const isComingFromTelegram = Boolean(telegramId) &&
-        Boolean(telegramUsername);
+      const isComingFromTelegram =
+        Boolean(telegramId) && Boolean(telegramUsername);
 
       // Validate required fields
       if (!email || !password) {
@@ -66,7 +66,7 @@ export const handler = define.handlers({
           if (!response.ok) {
             return createJsonResponse(
               result.error || "Registration failed",
-              response.status,
+              response.status
             );
           }
 
@@ -87,12 +87,12 @@ export const handler = define.handlers({
                     refresh_token: result.session?.refresh_token,
                     access_token: result.session?.access_token,
                   }),
-                },
+                }
               );
               if (!botResponse.ok) {
                 console.error(
                   "Failed to notify Telegram bot:",
-                  await botResponse.text(),
+                  await botResponse.text()
                 );
               }
             } catch (botError) {
@@ -106,7 +106,7 @@ export const handler = define.handlers({
             {
               user: result.user,
               needsEmailConfirmation: result.needsEmailConfirmation,
-            },
+            }
           );
         } else {
           // Login via auth-service
@@ -124,7 +124,7 @@ export const handler = define.handlers({
           if (response.status !== 200) {
             return createJsonResponse(
               result.error || "Login failed",
-              response.status,
+              response.status
             );
           }
 
@@ -145,12 +145,12 @@ export const handler = define.handlers({
                     refresh_token: result.refresh_token,
                     access_token: result.access_token,
                   }),
-                },
+                }
               );
               if (!botResponse.ok) {
                 console.error(
                   "Failed to notify Telegram bot:",
-                  await botResponse.text(),
+                  await botResponse.text()
                 );
               }
             } catch (botError) {
@@ -193,7 +193,7 @@ export const handler = define.handlers({
             maxAge: refreshTtlSec, // Same as refresh token
           });
 
-          headers.set("Location", "/dashboard");
+          headers.set("Location", "/recipes");
           return new Response(null, { status: 303, headers });
         }
       } catch (networkError) {
