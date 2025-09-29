@@ -1,8 +1,13 @@
 import { setCookie } from "jsr:@std/http/cookie";
 import { define, isSecureReq } from "../../utils.ts";
+import { refreshTokens } from "../../middlewares/auth.ts";
 
 export const handler = define.handlers({
   GET(ctx) {
+    // Clear refresh token from server-side store
+    if (ctx.state.user) {
+      refreshTokens.delete(ctx.state.user.id);
+    }
     const headers = new Headers();
     const secure = isSecureReq(ctx.req);
 
@@ -17,16 +22,6 @@ export const handler = define.handlers({
       maxAge: 0,
     });
 
-    // Clear refresh_token cookie
-    setCookie(headers, {
-      name: "refresh_token",
-      value: "",
-      path: "/",
-      httpOnly: true,
-      sameSite: "Strict",
-      secure,
-      maxAge: 0,
-    });
 
     // Clear user_id cookie
     setCookie(headers, {

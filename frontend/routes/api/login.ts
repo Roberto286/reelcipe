@@ -160,7 +160,9 @@ export const handler = define.handlers({
 
           const { access_token, refresh_token } = result;
           const accessTtlSec = 15 * 60;
-          const refreshTtlSec = 30 * 24 * 60 * 60;
+
+          // Store refresh_token server-side
+          refreshTokens.set(result.user.id, refresh_token);
 
           const headers = new Headers();
           const secure = isSecureReq(ctx.req);
@@ -175,22 +177,13 @@ export const handler = define.handlers({
             maxAge: accessTtlSec,
           });
           setCookie(headers, {
-            name: "refresh_token",
-            value: refresh_token,
-            path: "/",
-            httpOnly: true,
-            sameSite: "Strict",
-            secure,
-            maxAge: refreshTtlSec,
-          });
-          setCookie(headers, {
             name: "user_id",
             value: result.user.id,
             path: "/",
             httpOnly: false, // Allow frontend access
             sameSite: "Lax",
             secure,
-            maxAge: refreshTtlSec, // Same as refresh token
+            maxAge: 30 * 24 * 60 * 60, // 30 days
           });
 
           headers.set("Location", "/recipes");

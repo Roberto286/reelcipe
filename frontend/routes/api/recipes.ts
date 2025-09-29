@@ -16,42 +16,23 @@ export const handler = define.handlers({
         });
       }
 
-      // Get tokens and user_id from cookie
-      const accessToken = ctx.req.headers
-        .get("cookie")
-        ?.match(/access_token=([^;]+)/)?.[1];
-      const refreshToken = ctx.req.headers
-        .get("cookie")
-        ?.match(/refresh_token=([^;]+)/)?.[1];
-      const userId = ctx.req.headers
-        .get("cookie")
-        ?.match(/user_id=([^;]+)/)?.[1];
-
-      if (!accessToken || !userId) {
+      // Check if authenticated
+      if (!ctx.state.authenticated || !ctx.state.user) {
         return createErrorRedirect("Not authenticated");
       }
 
-      // Validate and refresh token via auth-service
-      const authResponse = await fetch(
-        "http://auth-service:8000/session/validate-and-refresh",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          }),
-        }
-      );
+      const userId = ctx.state.user.id;
 
-      if (!authResponse.ok) {
-        return createErrorRedirect("Session invalid");
+      // Get access_token from cookie
+      const accessToken = ctx.req.headers
+        .get("cookie")
+        ?.match(/access_token=([^;]+)/)?.[1];
+
+      if (!accessToken) {
+        return createErrorRedirect("Access token missing");
       }
 
-      const authData = await authResponse.json();
-      const validToken = authData.token;
+      const validToken = accessToken;
 
       // Generate and save recipe
       const response = await fetch("http://recipe-generator:8000/recipe", {
@@ -79,7 +60,6 @@ export const handler = define.handlers({
       }
 
       const data = await response.json();
-      console.log("data :>> ", data);
 
       const recipeId = data.result.recipeId;
 
