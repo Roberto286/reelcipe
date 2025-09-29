@@ -1,5 +1,4 @@
 import http from "node:http";
-import jwt from "jsonwebtoken";
 import {
   sendBadRequest,
   sendMethodNotAllowed,
@@ -7,11 +6,11 @@ import {
   sendUnauthorized,
 } from "./http/responses.js";
 import { extractBodyFromRequest } from "./lib/extract-body-from-request.js";
-import { startRecipeGeneration } from "./recipe/processor.js";
 import { mockRecipe } from "./mock-recipe.js";
+import { startRecipeGeneration } from "./recipe/processor.js";
 
 const PORT = process.env.PORT || 3000;
-const REQUIRED_ENV_VARIABLES = ["OPENAI_API_KEY", "SUPABASE_JWT_SECRET"];
+const REQUIRED_ENV_VARIABLES = ["OPENAI_API_KEY", "SUPABASE_ANON_KEY"];
 
 checkEnv();
 
@@ -34,27 +33,32 @@ http
       return sendBadRequest(res, "body is not a valid JSON");
     }
     const url = body?.url;
+    const accessToken = body?.access_token;
+    const userId = body?.user_id;
     if (!url) {
       return sendBadRequest(res, "'url' is required");
     }
-
-    // Development mode: return mock data
-    if (process.env.NODE_ENV === "development") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          message: "Recipe generated successfully!",
-          result: {
-            data: mockRecipe,
-          },
-        })
-      );
-      return;
+    if (!accessToken || !userId) {
+      return sendUnauthorized(res, "Authentication required");
     }
 
-    let recipe;
+    // Development mode: return mock data
+    // if (process.env.NODE_ENV === "development") {
+    //   res.writeHead(200, { "Content-Type": "application/json" });
+    //   res.end(
+    //     JSON.stringify({
+    //       message: "Recipe generated successfully!",
+    //       result: {
+    //         data: mockRecipe,
+    //       },
+    //     })
+    //   );
+    //   return;
+    // }
+
+    let recipeId;
     try {
-      recipe = await startRecipeGeneration(url);
+      recipeId = await startRecipeGeneration(url, accessToken, userId);
     } catch (e) {
       console.log("e :>> ", e);
       res.writeHead(500, { "Content-Type": "application/json" });
@@ -65,9 +69,9 @@ http
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
-        message: "Recipe generated successfully!",
+        message: "Recipe generated and saved successfully!",
         result: {
-          data: recipe,
+          recipeId,
         },
       })
     );
@@ -92,15 +96,5 @@ function checkEnv() {
       )}\nare required in order to use the program.\nMake sure to set them in your .env file`
     );
     process.exit(1);
-  }
-}
-
-function userAuthenticated(token) {
-  try {
-    const payload = jwt.verify(token, supabaseJwtSecret);
-    return payload;
-  } catch (error) {
-    console.log(error);
-    return null;
   }
 }

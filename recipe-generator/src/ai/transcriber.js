@@ -1,6 +1,6 @@
 import { createReadStream } from "node:fs";
-import axios from "axios";
-import FormData from "form-data";
+import axios from "npm:axios";
+import FormData from "npm:form-data";
 import { Status } from "../enum/status.enum.js";
 
 export async function transcribeAudio(audioFilePath) {
@@ -18,7 +18,7 @@ export async function transcribeAudio(audioFilePath) {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           ...form.getHeaders(),
         },
-      },
+      }
     );
 
     return {

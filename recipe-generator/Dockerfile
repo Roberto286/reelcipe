@@ -1,6 +1,8 @@
-FROM node:24-alpine
 
-RUN apk add --no-cache python3 py3-pip ffmpeg bash git build-base \
+FROM denoland/deno:debian-2.5.0
+
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip python3-venv ffmpeg bash git build-essential \
     && python3 -m venv /opt/venv \
     && . /opt/venv/bin/activate \
     && pip install --no-cache-dir yt-dlp moviepy
@@ -9,13 +11,13 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
-RUN npm i -g pnpm 
+# Prima copia solo i file di dipendenze
+COPY deno.json deno.lock* ./
 
-COPY package.json pnpm-lock.yaml* ./
+COPY . .
 
-RUN pnpm install
+RUN deno cache src/main.js
 
-COPY src src
-COPY .env .
-
-CMD ["pnpm", "start"]
+EXPOSE 5173
+EXPOSE 9229
+CMD ["deno", "task", "dev"]

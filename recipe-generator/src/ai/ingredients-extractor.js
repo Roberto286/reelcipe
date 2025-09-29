@@ -1,38 +1,20 @@
+import {
+  ingredientsExtractorUserPrompt,
+  ingredientsExtractorSystemPrompt,
+  replacePlaceholders,
+} from "./prompts.js";
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function extractIngredients(
   recipeText,
-  { description, comments },
+  { description, comments }
 ) {
-  const prompt = `
-Il tuo compito è leggere una trascrizione e trovare **ingredienti e quantità** specificate.
-
-## Istruzioni:
-- Rispondi in formato JSON: [{"ingrediente": "...", "quantità": "..."}]
-- Se la quantità è **stimata** perché mancante o vaga, aggiungi "stimata": true
-- Non includere istruzioni o testo extra, solo JSON
-- Se trovi lo stesso ingrediente con più varianti (es. "olio" e "olio extravergine"), considera il più preciso
-
-### Esempio Output:
-[
-  { "ingrediente": "latte", "quantità": "200 ml" },
-  { "ingrediente": "zucchero", "quantità": "2 cucchiai" },
-  { "ingrediente": "olio extravergine d'oliva", "quantità": "30 ml", "stimata": true }
-]
-
----
-
-### TESTO DA ANALIZZARE:
-
-[TRASCRIZIONE]
-${recipeText}
-
-[DESCRIZIONE]
-${description}
-
-[COMMENTI]
-${comments}
-`;
+  const prompt = replacePlaceholders(ingredientsExtractorUserPrompt, {
+    recipeText,
+    description: description || "",
+    comments: comments || "",
+  });
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -45,8 +27,7 @@ ${comments}
       messages: [
         {
           role: "system",
-          content:
-            "Sei un assistente che estrae ingredienti e quantità da ricette in italiano. Rispondi sempre in JSON.",
+          content: ingredientsExtractorSystemPrompt,
         },
         { role: "user", content: prompt },
       ],
@@ -57,6 +38,7 @@ ${comments}
   });
 
   const json = await res.json();
+  console.log("json :>> ", json);
   const content = json.choices?.[0]?.message?.content;
 
   try {

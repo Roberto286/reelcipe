@@ -1,4 +1,8 @@
-import { systemPrompt } from "./prompts.js";
+import {
+  systemPrompt,
+  recipeGeneratorUserPrompt,
+  replacePlaceholders,
+} from "./prompts.js";
 
 export async function generateRecipe(
   recipeText,
@@ -21,22 +25,12 @@ export async function generateRecipe(
         .join("\n")}\n\n`
     : "";
 
-  const userPrompt = `
-${formattedIngredients}Transform this transcription into a complete recipe following the specified markdown schema:
-
-REEL TRANSCRIPTION:
-${recipeText}
-
-${description ? `INSTAGRAM REEL DESCRIPTION: ${description}` : ""}
-${comments ? `INSTAGRAM REEL COMMENTS: ${comments}` : ""}
-
-**IMPORTANT**:
-- Use exactly the ingredients provided above in the 🥘 Ingredients section.
-- Do not modify them. Do not add new ones.
-- If other ingredients appear in the text, ignore them.
-- If some quantities are estimated, leave them indicated as "(estimated quantity)".
-- Include in the 💡 Tips any variants or substitutions from the comments.
-`;
+  const userPrompt = replacePlaceholders(recipeGeneratorUserPrompt, {
+    formattedIngredients,
+    recipeText,
+    description: description || "",
+    comments: comments || "",
+  });
   const requestBody = {
     model: MODEL,
     messages: [

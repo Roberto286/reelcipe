@@ -3,9 +3,11 @@ import { generateRecipe } from "../ai/recipe-generator.js";
 import { transcribeAudio } from "../ai/transcriber.js";
 import { extractAudioFrom } from "../audio/processor.js";
 import { Status } from "../enum/status.enum.js";
+import { saveGeneratedRecipe } from "shared";
 import { downloadVideo } from "../video/processor.js";
 
-export async function startRecipeGeneration(url) {
+export async function startRecipeGeneration(url, accessToken, userId) {
+  console.log("entrato :>> ");
   const videoInfo = await downloadVideo(url);
 
   if (videoInfo.status === Status.ERROR) {
@@ -37,5 +39,18 @@ export async function startRecipeGeneration(url) {
 
   console.log("recipe, metadata :>> ", recipe, metadata);
 
-  return recipe;
+  const generatedRecipe = {
+    ...recipe,
+    thumbnailUrl: videoInfo.metadata.thumbnailUrl,
+  };
+
+  // Save recipe to database
+  const recipeId = await saveGeneratedRecipe(
+    generatedRecipe,
+    url,
+    accessToken,
+    userId
+  );
+
+  return recipeId;
 }
