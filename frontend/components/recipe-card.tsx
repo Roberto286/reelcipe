@@ -1,14 +1,13 @@
-import { Recipe } from "shared";
 import { RecipeDashboard } from "../types/recipe-dashboard.d.ts";
-import recipeCardBadge from "./recipe-card-badge.tsx";
 
 export default function RecipeCard(props: RecipeDashboard) {
   return (
-    <div class="card image-full bg-base-100 w-96 shadow-sm">
-      <figure>
+    <div class="card bg-base-100 w-96 shadow-sm">
+      <figure class="aspect-square">
         <img
-          src={props.imageUrl}
-          alt="Shoes"
+          src={`/api/image-proxy?url=${encodeURIComponent(props.imageUrl)}`}
+          alt=""
+          class="w-full h-full object-cover object-center"
         />
       </figure>
       <div class="card-body">
@@ -17,9 +16,12 @@ export default function RecipeCard(props: RecipeDashboard) {
           <div class="badge badge-secondary">{props.rating}/5</div>
         </h2>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam ea
-          dolore quod tempore voluptatibus reiciendis atque architecto saepe
-          voluptates impedit.
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Cumque nobis
+          nisi ex est rem temporibus, deserunt quae aspernatur iusto rerum
+          voluptas cupiditate recusandae qui suscipit voluptatum eligendi modi
+          totam consectetur minima similique accusantium ipsa alias eius?
+          Repellat possimus velit illum, sit quasi veritatis asperiores
+          provident voluptatibus, inventore atque omnis nihil!
         </p>
         <div class="card-actions justify-end">
           {props.tags.map((t) => (
