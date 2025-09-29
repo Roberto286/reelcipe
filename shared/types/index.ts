@@ -56,6 +56,7 @@ export interface GeneratedRecipe {
     stepNumber: number;
   }>;
   tags: string[];
+  thumbnailUrl?: string;
 }
 
 export * from "../supabase/index.ts";

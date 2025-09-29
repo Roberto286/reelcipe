@@ -27,16 +27,20 @@ export async function saveGeneratedRecipe(
       title: recipe.title,
       default_serves: recipe.defaultServes,
       downloaded_from: url,
-      image_url: "https://placehold.co/400",
+      image_url: recipe.thumbnailUrl || "https://placehold.co/400",
       rating: 1,
       user_id: userId,
     })
     .select();
 
-  if (recipeError || !recipeData || recipeData.length === 0) {
-    throw new Error(
-      `Recipe insert failed: ${recipeError?.message || "No data returned"}`
-    );
+  if (recipeError) {
+    console.error("Recipe insert error details:", recipeError);
+    throw new Error(`Recipe insert failed: ${recipeError.message}`);
+  }
+
+  if (!recipeData || recipeData.length === 0) {
+    console.error("Recipe insert succeeded but no data returned");
+    throw new Error("Recipe insert failed: No data returned");
   }
 
   const recipeId = recipeData[0].id;
@@ -76,20 +80,42 @@ export async function saveGeneratedRecipe(
 
   // Insert tags
   for (const tagName of recipe.tags) {
-    const { data: tagData, error: tagError } = await supabase
+    // First, try to find existing tag
+    let { data: existingTag, error: selectError } = await supabase
       .from("tag")
-      .upsert({ name: tagName }, { onConflict: "name" })
-      .select()
+      .select("id")
+      .eq("name", tagName)
       .single();
 
-    if (tagError) {
-      console.error("Tag upsert error:", tagError);
+    let tagId: number;
+
+    if (selectError && selectError.code !== "PGRST116") {
+      // PGRST116 is "not found"
+      console.error("Tag select error:", selectError);
       continue;
+    }
+
+    if (existingTag) {
+      tagId = existingTag.id;
+    } else {
+      // Insert new tag
+      const { data: newTag, error: insertError } = await supabase
+        .from("tag")
+        .insert({ name: tagName })
+        .select("id")
+        .single();
+
+      if (insertError) {
+        console.error("Tag insert error:", insertError);
+        continue;
+      }
+
+      tagId = newTag.id;
     }
 
     const { error: linkError } = await supabase
       .from("recipe_tag")
-      .insert({ recipe_id: recipeId, tag_id: tagData.id });
+      .insert({ recipe_id: recipeId, tag_id: tagId });
 
     if (linkError) {
       console.error("Recipe-tag link error:", linkError);
