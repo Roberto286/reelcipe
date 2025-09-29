@@ -32,7 +32,7 @@ services:
       watch:
         - path: ../recipe-generator
           target: /app
-          action: sync+restart
+          action: sync
 
   auth-service:
     environment:

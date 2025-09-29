@@ -45,7 +45,7 @@ services:
 
   auth-service:
     volumes:
-      - ../shared:/shared
+      - ../shared:/app/shared
     container_name: auth-service
     healthcheck:
       test:
