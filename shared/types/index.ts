@@ -20,6 +20,9 @@ export type Recipe = {
   tags: Pick<Tag, "id" | "name">[];
   ingredients: Ingredient[];
   createdAt: string;
+  prepTime?: number; // in minutes
+  cookTime?: number; // in minutes
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
 };
 
 export type Recipes = Pick<Recipe, "id" | "title" | "imageUrl">[];

@@ -7,6 +7,7 @@ import {
   passwordRegex,
 } from "../../utils.ts";
 import { MESSAGES } from "../login.tsx";
+import { refreshTokens } from "../../middlewares/auth.ts";
 
 export const handler = define.handlers({
   async POST(ctx) {

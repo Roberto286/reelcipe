@@ -15,6 +15,7 @@ export const handler = define.handlers({
       const accessToken = ctx.req.headers
         .get("cookie")
         ?.match(/access_token=([^;]+)/)?.[1];
+      console.log("accessToken :>> ", accessToken);
       const recipes = await getRecipes(accessToken);
       return {
         data: { recipes },

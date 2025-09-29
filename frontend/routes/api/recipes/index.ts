@@ -1,5 +1,6 @@
-import { define } from "../../utils.ts";
+import { define } from "../../../utils.ts";
 import { createErrorRedirect, createSuccessRedirect } from "shared";
+import { getCookies } from "jsr:@std/http/cookie";
 
 export const handler = define.handlers({
   async POST(ctx) {
@@ -24,9 +25,8 @@ export const handler = define.handlers({
       const userId = ctx.state.user.id;
 
       // Get access_token from cookie
-      const accessToken = ctx.req.headers
-        .get("cookie")
-        ?.match(/access_token=([^;]+)/)?.[1];
+      const cookies = getCookies(ctx.req.headers);
+      const accessToken = cookies.access_token;
 
       if (!accessToken) {
         return createErrorRedirect("Access token missing");

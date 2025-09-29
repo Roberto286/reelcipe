@@ -2,7 +2,7 @@ import { RecipeDashboard } from "../types/recipe-dashboard.d.ts";
 
 export default function RecipeCard(props: RecipeDashboard) {
   return (
-    <div class="card bg-base-100 w-96 shadow-sm">
+    <div class="card card-sm bg-base-100 w-96 shadow-sm">
       <figure class="aspect-square">
         <img
           src={`/api/image-proxy?url=${encodeURIComponent(props.imageUrl)}`}
