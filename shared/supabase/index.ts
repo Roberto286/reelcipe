@@ -455,3 +455,27 @@ export async function updateRecipe(
     }
   }
 }
+
+export async function insertUserLanguage(
+  userId: string,
+  language: string,
+  accessToken: string
+): Promise<void> {
+  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+
+  const { error } = await supabase.from("profiles").upsert({
+    id: userId,
+    language,
+  });
+
+  if (error) {
+    console.error("User language upsert error:", error);
+    throw new Error(`User language upsert failed: ${error.message}`);
+  }
+}

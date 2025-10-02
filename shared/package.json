@@ -1,7 +1,0 @@
-{
-  "name": "@openrecipes/shared",
-  "version": "1.0.0",
-  "description": "Shared utilities and types for OpenRecipes",
-  "main": "index.ts",
-  "type": "module"
-}

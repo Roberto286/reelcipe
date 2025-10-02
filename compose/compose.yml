@@ -68,6 +68,12 @@ services:
     networks:
       - default
 
+  shared:
+    container_name: shared
+    image: denoland/deno:latest
+    networks:
+      - default
+
 networks:
   default:
     name: ${COMPOSE_PROJECT_NAME:-openrecipes}_default
