@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar.tsx";
+import Navbar from "../components/Navbar/index.tsx";
 import { define } from "../utils.ts";
 
 export default define.page(function App({ Component, state }) {

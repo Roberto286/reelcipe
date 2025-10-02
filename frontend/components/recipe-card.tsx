@@ -3,7 +3,7 @@ import { RecipeDashboard } from "../types/recipe-dashboard.d.ts";
 export default function RecipeCard(props: RecipeDashboard) {
   return (
     <div class="card card-sm bg-base-100 w-96 shadow-sm">
-      <figure class="aspect-square">
+      <figure class="aspect-square rounded-xl">
         <img
           src={`/api/image-proxy?url=${encodeURIComponent(props.imageUrl)}`}
           alt=""
@@ -15,16 +15,8 @@ export default function RecipeCard(props: RecipeDashboard) {
           {props.title}
           <div class="badge badge-secondary">{props.rating}/5</div>
         </h2>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Cumque nobis
-          nisi ex est rem temporibus, deserunt quae aspernatur iusto rerum
-          voluptas cupiditate recusandae qui suscipit voluptatum eligendi modi
-          totam consectetur minima similique accusantium ipsa alias eius?
-          Repellat possimus velit illum, sit quasi veritatis asperiores
-          provident voluptatibus, inventore atque omnis nihil!
-        </p>
         <div class="card-actions justify-end">
-          {props.tags.map((t) => (
+          {props.tags.slice(0,3).map((t) => (
             <div key={t.id} class="badge badge-outline">{t.name}</div>
           ))}
         </div>
