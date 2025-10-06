@@ -42,14 +42,14 @@ export const handler = define.handlers({
       const authServiceUrl = "http://auth-service:8000";
 
       try {
-        if (mode === "register") {
+        if (mode === "signup") {
           const metadata: Record<string, string> = {};
           if (isComingFromTelegram) {
             metadata.telegram_id = telegramId;
             metadata.username = telegramUsername;
           }
 
-          // Register new user via auth-service
+          // signup new user via auth-service
           const response = await fetch(`${authServiceUrl}/signup`, {
             method: "POST",
             headers: {

@@ -6,7 +6,7 @@ export const MESSAGES = {
     "Password must be at least 8 characters with uppercase, lowercase, digit, and special character",
   MISSING_FIELDS: "Email and password are required",
   LOGIN_SUCCESS: "Login successful",
-  REGISTER_SUCCESS: "Registration successful",
+  signup_SUCCESS: "Registration successful",
   SERVER_ERROR: "Internal server error",
 };
 
@@ -25,9 +25,7 @@ const getRedirectUrl = (
 
 export default define.page(function Login(ctx) {
   const url = new URL(ctx.req.url);
-  const mode = url.searchParams.get("mode") === "register"
-    ? "register"
-    : "login";
+  const mode = url.searchParams.get("mode") === "signup" ? "signup" : "login";
   const telegramId = url.searchParams.get("telegram_id") || undefined;
   const telegramUsername = url.searchParams.get("telegram_username") ||
     undefined;
@@ -43,11 +41,11 @@ export default define.page(function Login(ctx) {
         </a>
         <a
           role="tab"
-          class={`tab ${mode === "register" ? "tab-active" : ""}`}
+          class={`tab ${mode === "signup" ? "tab-active" : ""}`}
           href={getRedirectUrl({
             telegramId,
             telegramUsername,
-            mode: "register",
+            mode: "signup",
           })}
         >
           Registrazione
@@ -78,7 +76,7 @@ export default define.page(function Login(ctx) {
             <input type="hidden" name="mode" value={mode} />
             <fieldset class="fieldset">
               <legend class="fieldset-legend">
-                {mode === "login" ? "Login" : "Register"}
+                {mode === "login" ? "Login" : "signup"}
               </legend>
               <div>
                 <label class="label" for="email">
@@ -93,9 +91,7 @@ export default define.page(function Login(ctx) {
                   required
                 />
                 <div class="validator-hint">
-                  {mode === "login"
-                    ? "Enter a valid email"
-                    : "Enter a valid email or username"}
+                  "Enter a valid email"
                 </div>
               </div>
               <div>
@@ -111,7 +107,7 @@ export default define.page(function Login(ctx) {
                 />
                 <div class="validator-hint">Password is required</div>
               </div>
-              {mode === "register" && (
+              {mode === "signup" && (
                 <div>
                   <label class="label" for="confirm-password">
                     Confirm Password
@@ -133,7 +129,7 @@ export default define.page(function Login(ctx) {
                 class="btn btn-primary mt-4"
                 id="submit-btn"
               >
-                {mode === "login" ? "Login" : "Register"}
+                {mode === "login" ? "Login" : "signup"}
               </button>
             </fieldset>
           </form>
