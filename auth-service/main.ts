@@ -3,7 +3,7 @@ import { cors } from "jsr:@hono/hono/cors";
 import { logger } from "jsr:@hono/hono/logger";
 import { HTTPException } from "jsr:@hono/hono/http-exception";
 import { createClient, User } from "jsr:@supabase/supabase-js@2";
-
+import { insertUserLanguage } from "shared";
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_ANON_KEY")!
@@ -126,7 +126,7 @@ app.get("/health", async (c) => {
 // Registrazione utente
 app.post("/signup", async (c) => {
   try {
-    const { email, password, metadata } = await c.req.json();
+    const { email, password, metadata, language } = await c.req.json();
 
     if (!email || !password) {
       throw new HTTPException(400, { message: "Missing email or password" });
@@ -143,25 +143,41 @@ app.post("/signup", async (c) => {
       });
     }
 
-    const signUpData = {
+    const signUpPayload = {
       email,
       password,
       options: metadata ? { data: metadata } : undefined,
     };
 
-    const { data, error } = await supabase.auth.signUp(signUpData);
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
+      signUpPayload
+    );
 
-    if (error) {
-      console.log("error :>> ", error);
-      throw new HTTPException(400, { message: error.message });
+    if (signUpError) {
+      console.log("error :>> ", signUpError);
+      throw new HTTPException(400, { message: signUpError.message });
+    }
+
+    // Insert user language if provided and user was created successfully
+    if (language && signUpData.user?.id && signUpData.session?.access_token) {
+      try {
+        await insertUserLanguage(
+          signUpData.user.id,
+          language,
+          signUpData.session.access_token
+        );
+      } catch (languageError) {
+        console.log("language error :>> ", languageError);
+        // Don't throw here - user was created successfully, language is secondary
+      }
     }
 
     return c.json(
       {
         message: "User created successfully",
-        user: data.user,
-        session: data.session,
-        needsEmailConfirmation: !data.session,
+        user: signUpData.user,
+        session: signUpData.session,
+        needsEmailConfirmation: !signUpData.session,
       },
       201
     );

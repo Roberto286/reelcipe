@@ -1,6 +1,7 @@
 {
   "imports": {
-    "hono": "jsr:@hono/hono@^4.9.5"
+    "hono": "jsr:@hono/hono@^4.9.5",
+    "shared": "/shared/index.ts"
   },
   "tasks": {
     "dev": "deno run --allow-env --allow-net --env-file --watch main.ts",

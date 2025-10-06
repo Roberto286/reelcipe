@@ -44,9 +44,8 @@ services:
       - default
 
   auth-service:
-    volumes:
-      - ../shared:/app/shared
     container_name: auth-service
+    image: denoland/deno:latest
     healthcheck:
       test:
         [
@@ -58,9 +57,6 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    build:
-      context: ../auth-service
-      dockerfile: Dockerfile
     ports:
       - "3569:8000"
     env_file:
