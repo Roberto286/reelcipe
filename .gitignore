@@ -14,7 +14,10 @@ _fresh
 .vscode/
 
 **/.env
+.env
+.env.local
 
 .vite
 .zed
 **/vite.config.ts.*
+node_modules
