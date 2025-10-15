@@ -1,8 +1,8 @@
-import { session, Telegraf } from "telegraf";
-import { message } from "telegraf/filters";
+import { session, Telegraf } from "npm:telegraf";
+import { message } from "npm:telegraf/filters";
 import { handleMessage } from "./handlers.js";
 import { initDb } from "./db.js";
-import express from "express";
+import express from "npm:express";
 import {
   createNewUser,
   findUserByTelegramId,

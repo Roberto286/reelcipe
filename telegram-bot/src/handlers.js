@@ -1,5 +1,5 @@
 import { isUrl } from "./functions.js";
-import { Markup } from "telegraf";
+import { Markup } from "npm:telegraf";
 import { OPENRECIPE_FE_BASEURL, RECIPE_GENERATOR_BASE_URL } from "./config.js";
 import { findUserByTelegramId, updateUserByTelegramId } from "./db.js";
 
