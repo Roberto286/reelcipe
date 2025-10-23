@@ -65,4 +65,4 @@ services:
 
 networks:
   default:
-    name: ${COMPOSE_PROJECT_NAME:-openrecipes}_default
+    name: ${COMPOSE_PROJECT_NAME:-reelcipe}_default

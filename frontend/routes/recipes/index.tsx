@@ -35,7 +35,7 @@ export default define.page(function DashboardPage({ data }) {
   return (
     <div class="min-h-screen bg-base-200">
       <Head>
-        <title>Recipe Dashboard - Openrecipes</title>
+        <title>Recipe Dashboard - reelcipe</title>
       </Head>
 
       <div class="container mx-auto px-4 py-8">

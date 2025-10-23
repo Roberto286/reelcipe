@@ -1,7 +1,7 @@
 {
   "imports": {
     "hono": "jsr:@hono/hono@^4.9.5",
-    "shared": "jsr:@openrecipes/shared"
+    "shared": "jsr:@reelcipe/shared"
   },
   "tasks": {
     "dev": "deno run --allow-env --allow-net --env-file=.env --env-file=.env.local --watch main.ts",

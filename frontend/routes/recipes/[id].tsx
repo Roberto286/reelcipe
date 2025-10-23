@@ -91,7 +91,7 @@ export default define.page<typeof handler>(
     return (
       <div class="min-h-screen bg-base-200">
         <Head>
-          <title>{recipe.title} - Openrecipes</title>
+          <title>{recipe.title} - reelcipe</title>
         </Head>
 
         <div class="container mx-auto px-4 py-8 max-w-4xl">

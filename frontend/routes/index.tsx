@@ -5,7 +5,7 @@ export default define.page(function Home(ctx) {
   return (
     <div class="px-4 py-8 mx-auto min-h-screen">
       <Head>
-        <title>Openrecipes</title>
+        <title>reelcipe</title>
       </Head>
     </div>
   );
