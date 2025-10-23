@@ -3,8 +3,6 @@ include:
 
 services:
   frontend:
-    volumes:
-      - ../shared:/shared
     container_name: frontend
     build:
       context: ../frontend
@@ -18,21 +16,16 @@ services:
 
   telegram-bot:
     container_name: telegram-bot
+    image: denoland/deno:latest
     volumes:
       - ../telegram-bot/db:/app/db
-      - ../shared:/shared
-    build:
-      context: ../telegram-bot
-      dockerfile: Dockerfile
+
     environment:
       RUNNER: docker
-      # NODE_ENV verrà impostato negli override
     networks:
       - default
 
   recipe-generator:
-    volumes:
-      - ../shared:/shared
     container_name: recipe-generator
     build:
       context: ../recipe-generator

@@ -1,4 +1,7 @@
 {
+  "name": "@openrecipes/shared",
+  "version": "1.0.0",
+  "exports": "./index.ts",
   "tasks": {
     "dev": "deno run --env-file=../.env --env-file=.env.local --watch main.ts",
     "start": "deno run --env-file=../.env --env-file=.env.local main.ts"

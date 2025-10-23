@@ -1,7 +1,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import type { Rating } from "../index.ts";
 import type { GeneratedRecipe, Recipe } from "../types/index.ts";
-import { Rating } from "../index.ts";
-import { Database } from "./supabase.ts";
+import type { Database } from "./supabase.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;

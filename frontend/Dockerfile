@@ -1,4 +1,4 @@
-FROM denoland/deno:latest
+FROM denoland/deno:2.5.1
 
 WORKDIR /app
 
@@ -11,4 +11,4 @@ RUN deno cache main.ts
 
 EXPOSE 5173
 EXPOSE 9229
-CMD ["deno", "task", "inspect"]
+CMD ["deno", "task", "dev"]

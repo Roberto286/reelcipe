@@ -1,6 +1,0 @@
-packages:
-  - shared
-  - frontend
-  - auth-service
-  - recipe-generator
-  - telegram-bot

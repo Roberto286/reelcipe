@@ -1,0 +1,71 @@
+sequenceDiagram
+    participant U as Utente
+    participant B as Bot Telegram
+    participant F as Frontend
+    participant SA as Supabase Auth
+    participant DB as DB Bot
+    participant G as Generatore
+
+    Note over U,G: 🔐 Flusso di Autenticazione Iniziale
+
+    U->>B: /start o comando che richiede auth
+    B->>DB: Controlla se esiste token per telegram_id
+    DB-->>B: Token non trovato
+    B-->>U: "Devi fare login! Vai su: [link con telegram_id]"
+    
+    Note over U,SA: Login tramite Frontend
+    U->>F: Apre link di login
+    F->>SA: Richiesta login/signup
+    SA-->>F: Token di accesso + dati utente
+    
+    Note over F,DB: Associazione token al Bot
+    F->>B: POST /auth/link con {telegram_id, access_token, refresh_token}
+    B->>SA: Verifica validità token
+    SA-->>B: Token valido + user info
+    B->>DB: Salva associazione (telegram_id → tokens + user_data)
+    DB-->>B: Salvato con successo
+    B-->>F: "Autenticazione completata"
+    F-->>U: "✅ Login completato! Torna su Telegram"
+    
+    Note over U,G: 🚀 Utilizzo del Bot (post-autenticazione)
+    
+    U->>B: /genera "pasta carbonara"
+    B->>DB: Recupera token per telegram_id
+    DB-->>B: access_token + user_data
+    
+    alt Token valido
+        B->>SA: Verifica token
+        SA-->>B: ✅ Token valido
+        B->>G: Genera ricetta (con user_id interno)
+        G-->>B: Ricetta generata
+        B->>DB: Salva ricetta per utente
+        DB-->>B: Ricetta salvata
+        B-->>U: "✅ Ricetta: [dettagli ricetta]"
+    else Token scaduto
+        B->>SA: Verifica token
+        SA-->>B: ❌ Token scaduto
+        B->>SA: Refresh token
+        alt Refresh riuscito
+            SA-->>B: Nuovo access_token
+            B->>DB: Aggiorna token salvato
+            DB-->>B: Token aggiornato
+            B->>G: Genera ricetta
+            G-->>B: Ricetta generata
+            B->>DB: Salva ricetta
+            DB-->>B: Ricetta salvata
+            B-->>U: "✅ Ricetta: [dettagli ricetta]"
+        else Refresh fallito
+            SA-->>B: ❌ Refresh scaduto
+            B->>DB: Rimuovi token per telegram_id
+            DB-->>B: Token rimosso
+            B-->>U: "🔒 Sessione scaduta! Rifai login: [link]"
+        end
+    end
+    
+    Note over U,F: 📱 Visualizzazione Frontend
+    
+    U->>F: Accede al frontend
+    F->>SA: Login (stesso utente)
+    SA-->>F: Token + session
+    F->>F: Carica ricette dell'utente
+    F-->>U: Dashboard con ricette generate via Bot

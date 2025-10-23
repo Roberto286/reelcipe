@@ -3,13 +3,17 @@ services:
     environment:
       DENO_ENV: development
     command: "deno task inspect"
+    working_dir: /app
     ports:
       - "3569:8000"
-      - "9230:9230" # Deno inspector
+      - "9230:9229" # Deno inspector
     develop:
       watch:
         - path: ../auth-service
           target: /app
+          action: sync
+        - path: ../shared
+          target: /app/shared
           action: sync
 
   frontend:
@@ -23,28 +27,36 @@ services:
         - path: ../frontend
           target: /app
           action: sync
+        - path: ../shared
+          target: /app/shared
+          action: sync
 
   telegram-bot:
     environment:
-      NODE_ENV: development
+      DENO_ENV: development
     ports:
-      - "9231:9231" # Node inspector
+      - "9231:9229" # Deno inspector
     develop:
       watch:
-        - path: ../telegram-bot/src
-          target: /app/src
-          action: sync+restart
-
+        - path: ../telegram-bot
+          target: /app
+          action: sync
+        - path: ../shared
+          target: /app/shared
+          action: sync
   recipe-generator:
     environment:
-      NODE_ENV: development
+      DENO_ENV: development
     ports:
       - "7823:8000"
-      - "9232:9232" # Node inspector
+      - "9232:9229" # Deno inspector
     develop:
       watch:
         - path: ../recipe-generator
           target: /app
+          action: sync
+        - path: ../shared
+          target: /app/shared
           action: sync
 
   shared:
