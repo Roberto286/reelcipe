@@ -14,8 +14,6 @@ const REQUIRED_ENV_VARIABLES = ["OPENAI_API_KEY", "SUPABASE_ANON_KEY"];
 
 checkEnv();
 
-const supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET;
-
 http
   .createServer(async (req, res) => {
     if (req.method !== "POST") {
