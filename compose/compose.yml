@@ -39,6 +39,9 @@ services:
   auth-service:
     container_name: auth-service
     image: denoland/deno:latest
+    build:
+      context: ..
+      dockerfile: auth-service/Dockerfile
     healthcheck:
       test:
         [
