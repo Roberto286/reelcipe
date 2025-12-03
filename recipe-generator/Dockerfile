@@ -18,9 +18,6 @@ WORKDIR /app
 # Copia solo i file di dipendenze
 COPY deno.json deno.lock* ./
 
-# Cache delle dipendenze Deno
-RUN deno cache --lock=deno.lock deno.json || true
-
 # Stage 3: Builder
 FROM denoland/deno:debian-2.5.0 AS builder
 
@@ -28,7 +25,6 @@ WORKDIR /app
 
 # Copia dipendenze Deno dallo stage precedente
 COPY --from=deno-deps /app/deno.json /app/deno.lock* ./
-COPY --from=deno-deps /root/.cache/deno /root/.cache/deno
 
 # Copia il codice sorgente
 COPY . .
@@ -54,7 +50,6 @@ WORKDIR /app
 
 # Copia l'applicazione builddata dallo stage builder
 COPY --from=builder /app ./
-COPY --from=builder /root/.cache/deno /root/.cache/deno
 
 EXPOSE 5173
 EXPOSE 9229
