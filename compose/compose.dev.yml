@@ -6,7 +6,6 @@ services:
     working_dir: /app
     ports:
       - "3569:8000"
-      - "9230:9229" # Deno inspector
     develop:
       watch:
         - path: ../auth-service
@@ -21,7 +20,6 @@ services:
       DENO_ENV: development
     ports:
       - "3500:5173"
-      - "9229:9229" # Deno inspector per Zed
     develop:
       watch:
         - path: ../frontend
@@ -35,7 +33,7 @@ services:
     environment:
       DENO_ENV: development
     ports:
-      - "9231:9229" # Deno inspector
+      - "8001:8000"
     develop:
       watch:
         - path: ../telegram-bot
@@ -49,7 +47,6 @@ services:
       DENO_ENV: development
     ports:
       - "7823:8000"
-      - "9232:9229" # Deno inspector
     develop:
       watch:
         - path: ../recipe-generator
