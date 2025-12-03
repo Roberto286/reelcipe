@@ -16,7 +16,6 @@ WORKDIR /app
 
 # Copia dipendenze dallo stage precedente
 COPY --from=deps /app/deno.json /app/deno.lock* ./
-COPY --from=deps /root/.cache/deno /root/.cache/deno
 
 # Copia il codice sorgente
 COPY . .
@@ -31,7 +30,6 @@ WORKDIR /app
 
 # Copia solo i file necessari per il runtime
 COPY --from=builder /app ./
-COPY --from=builder /root/.cache/deno /root/.cache/deno
 
 EXPOSE 5173
 EXPOSE 9229
