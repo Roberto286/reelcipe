@@ -1,0 +1,73 @@
+{
+  "name": "Reelcipe Development",
+  "dockerComposeFile": [
+    "../compose/compose.yml",
+    "../compose/compose.dev.yml"
+  ],
+  "service": "frontend",
+  "workspaceFolder": "/workspace",
+  "runServices": ["frontend", "auth-service", "telegram-bot", "recipe-generator", "backend", "mongodb"],
+  "overrideCommand": true,
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.git,target=/workspace/.git,type=bind,consistency=cached"
+  ],
+  "forwardPorts": [
+    3500,
+    3569,
+    7823,
+    9229,
+    9230,
+    9231
+  ],
+  "portsAttributes": {
+    "3500": {
+      "label": "Frontend",
+      "onAutoForward": "notify"
+    },
+    "3569": {
+      "label": "Auth Service",
+      "onAutoForward": "silent"
+    },
+    "7823": {
+      "label": "Recipe Generator",
+      "onAutoForward": "silent"
+    },
+    "9229": {
+      "label": "Frontend Debug",
+      "onAutoForward": "silent"
+    },
+    "9230": {
+      "label": "Auth Service Debug",
+      "onAutoForward": "silent"
+    },
+    "9231": {
+      "label": "Telegram Bot Debug",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "denoland.vscode-deno",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "deno.enable": true,
+        "deno.enablePaths": [
+          "./frontend",
+          "./backend",
+          "./auth-service",
+          "./telegram-bot",
+          "./recipe-generator",
+          "./shared"
+        ],
+        "deno.lint": true,
+        "deno.unstable": true,
+        "deno.path": "/usr/bin/deno"
+      }
+    }
+  },
+  "postCreateCommand": "apt-get update && apt-get install -y curl && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs && echo 'Development environment ready!'",
+  "remoteUser": "root"
+}
