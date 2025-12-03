@@ -16,10 +16,11 @@ services:
 
   telegram-bot:
     container_name: telegram-bot
-    image: denoland/deno:latest
+    build:
+      context: ..
+      dockerfile: telegram-bot/Dockerfile
     volumes:
       - ../telegram-bot/db:/app/db
-
     environment:
       RUNNER: docker
     networks:
