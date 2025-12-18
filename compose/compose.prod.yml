@@ -20,8 +20,10 @@ services:
     # command: sh -lc "pnpm -s build && node dist/index.js"
     restart: unless-stopped
 
-  auth-service:
+  backend:
     environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
       DENO_ENV: production
-    command: sh -lc "deno task start || deno run -A /app/main.ts"
+    # command: sh -lc "deno task start || deno run -A /app/apps/backend/server.ts"
     restart: unless-stopped

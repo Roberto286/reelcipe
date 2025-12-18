@@ -1,17 +1,11 @@
 {
   "nodeModulesDir": "auto",
-  "workspace": [
-    "shared",
-    "frontend",
-    "auth-service",
-    "recipe-generator",
-    "telegram-bot"
-  ],
+  "workspace": ["apps/*", "packages/*"],
   "tasks": {
-    "start:dev": "COMPOSE_PROFILES=dev docker compose -f compose/compose.yml -f compose/compose.dev.yml watch",
-    "start:prod": "docker compose -f compose/compose.yml -f compose/compose.prod.yml up -d --remove-orphans",
-    "down": "docker compose -f compose/compose.yml down --remove-orphans",
-    "nuke": "docker compose -f compose/compose.yml down --remove-orphans --volumes --rmi local",
-    "logs": "docker compose -f compose/compose.yml logs -f --tail=100"
+    "start:dev": "COMPOSE_PROFILES=dev docker compose --env-file .env -f compose/compose.yml -f compose/compose.dev.yml up -d --build",
+    "start:prod": "docker compose --env-file .env -f compose/compose.yml -f compose/compose.prod.yml up -d --remove-orphans",
+    "down": "docker compose --env-file .env -f compose/compose.yml -f compose/compose.dev.yml down --remove-orphans",
+    "nuke": "docker compose --env-file .env -f compose/compose.yml -f compose/compose.dev.yml down --remove-orphans --volumes --rmi local",
+    "logs": "docker compose --env-file .env -f compose/compose.yml -f compose/compose.dev.yml logs -f --tail=100"
   }
 }

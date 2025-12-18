@@ -1,68 +1,38 @@
 services:
-  auth-service:
-    environment:
-      DENO_ENV: development
-    command: "deno task inspect"
-    working_dir: /app
+  backend:
+    build:
+      context: ../
+      dockerfile: apps/backend/Dockerfile
+    volumes:
+      - ../apps/backend:/app/apps/backend
     ports:
-      - "3569:8000"
-    develop:
-      watch:
-        - path: ../auth-service
-          target: /app
-          action: sync
-        - path: ../shared
-          target: /app/shared
-          action: sync
+      - "8000:8000"
+    command: deno task dev
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret}
+      BETTER_AUTH_URL: http://localhost:8000
 
   frontend:
-    environment:
-      DENO_ENV: development
+    build:
+      context: ../
+      dockerfile: apps/frontend/Dockerfile
+    volumes:
+      - ../apps/frontend:/app/apps/frontend
     ports:
       - "3500:5173"
-    develop:
-      watch:
-        - path: ../frontend
-          target: /app
-          action: sync
-        - path: ../shared
-          target: /app/shared
-          action: sync
 
   telegram-bot:
-    environment:
-      DENO_ENV: development
-    ports:
-      - "8001:8000"
-    develop:
-      watch:
-        - path: ../telegram-bot
-          target: /app
-          action: sync
-        - path: ../shared
-          target: /app/shared
-          action: sync
+    build:
+      context: ../
+      dockerfile: apps/telegram-bot/Dockerfile
+    volumes:
+      - ../apps/telegram-bot:/app/apps/telegram-bot
+
   recipe-generator:
-    environment:
-      DENO_ENV: development
+    build:
+      context: ../
+      dockerfile: apps/recipe-generator/Dockerfile
+    volumes:
+      - ../apps/recipe-generator:/app/apps/recipe-generator
     ports:
       - "7823:8000"
-    develop:
-      watch:
-        - path: ../recipe-generator
-          target: /app
-          action: sync
-        - path: ../shared
-          target: /app/shared
-          action: sync
-
-  shared:
-    command: "deno task dev"
-    working_dir: /app
-    volumes:
-      - ../shared:/app
-    develop:
-      watch:
-        - path: ../shared
-          target: /app
-          action: sync

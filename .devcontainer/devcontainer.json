@@ -5,13 +5,7 @@
     "../compose/compose.dev.yml"
   ],
   "service": "frontend",
-  "workspaceFolder": "/workspace",
-  "runServices": ["frontend", "auth-service", "telegram-bot", "recipe-generator", "backend", "mongodb"],
-  "overrideCommand": true,
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-    "source=${localWorkspaceFolder}/.git,target=/workspace/.git,type=bind,consistency=cached"
-  ],
+  "workspaceFolder": "/app",
   "forwardPorts": [
     3500,
     3569,
@@ -54,20 +48,11 @@
       ],
       "settings": {
         "deno.enable": true,
-        "deno.enablePaths": [
-          "./frontend",
-          "./backend",
-          "./auth-service",
-          "./telegram-bot",
-          "./recipe-generator",
-          "./shared"
-        ],
         "deno.lint": true,
-        "deno.unstable": true,
-        "deno.path": "/usr/bin/deno"
+        "deno.unstable": true
       }
     }
   },
-  "postCreateCommand": "apt-get update && apt-get install -y curl && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs && echo 'Development environment ready!'",
+  "postCreateCommand": "echo 'Development environment ready!'",
   "remoteUser": "root"
 }

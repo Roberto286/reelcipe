@@ -1,69 +1,55 @@
-include:
-  - path: ../backend/docker-compose.yml
-
 services:
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: reelcipe
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [default]
+
+  backend:
+    container_name: backend
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      MONGODB_DB: reelcipe
+      PORT: 8000
+    networks: [default]
+
   frontend:
     container_name: frontend
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3500:5173"
-      - "9229:9229"
-    environment: {} # DENO_ENV verrà impostato negli override
-    networks:
-      - default
+    environment:
+      BACKEND_URL: http://backend:8000
+    networks: [default]
 
   telegram-bot:
     container_name: telegram-bot
-    build:
-      context: ..
-      dockerfile: telegram-bot/Dockerfile
-    volumes:
-      - ../telegram-bot/db:/app/db
     environment:
-      RUNNER: docker
-    networks:
-      - default
+      BACKEND_URL: http://backend:8000
+      BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    networks: [default]
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
 
   recipe-generator:
     container_name: recipe-generator
-    build:
-      context: ../recipe-generator
-      dockerfile: Dockerfile
-    environment: {}
-    ports:
-      - "7823:8000"
-    networks:
-      - default
+    environment:
+      BACKEND_URL: http://backend:8000
+    networks: [default]
 
-  auth-service:
-    container_name: auth-service
-    image: denoland/deno:latest
-    build:
-      context: ..
-      dockerfile: auth-service/Dockerfile
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "deno",
-          "eval",
-          "const res = await fetch('http://studio:3000/api/platform/profile'); if (res.status !== 200) { console.error('Healthcheck failed with status', res.status); Deno.exit(1); }",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    ports:
-      - "3569:8000"
-    networks:
-      - default
-
-  shared:
-    container_name: shared
-    image: denoland/deno:latest
-    networks:
-      - default
+volumes:
+  mongodb-data:
 
 networks:
   default:
