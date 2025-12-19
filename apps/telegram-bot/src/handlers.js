@@ -1,6 +1,6 @@
 import { isUrl } from "./functions.js";
 import { Markup } from "npm:telegraf";
-import { OPENRECIPE_FE_BASEURL, RECIPE_GENERATOR_BASE_URL } from "./config.js";
+import { REELCIPE_FE_BASEURL, RECIPE_GENERATOR_BASE_URL } from "./config.js";
 import { findUserByTelegramId, updateUserByTelegramId } from "./db.js";
 
 const BACKEND_URL = "http://backend:8000";
@@ -72,7 +72,6 @@ async function handleCommand(ctx, command) {
 async function handleAuthentication(ctx) {
   const telegramId = ctx.from.id.toString();
   const user = findUserByTelegramId(telegramId);
-  console.log("🚀 ~ handleAuthentication ~ user:", user);
   if (!user) {
     return false;
   }
@@ -83,7 +82,6 @@ async function handleAuthentication(ctx) {
     ctx.session.user_id = user.userId;
     sessionToken = user.session_token;
   }
-  console.log("sessionToken :>> ", sessionToken);
 
   let isValid = false;
 
@@ -102,10 +100,7 @@ async function handleAuthentication(ctx) {
         if (data.session && data.user) {
           isValid = true;
           ctx.session.user_id = data.user.id;
-          console.log("Session valid for user:", data.user.id);
         }
-      } else {
-        console.log("Session invalid or expired");
       }
     } catch (error) {
       console.error("Error validating session:", error);
@@ -123,9 +118,9 @@ async function handleAuthentication(ctx) {
 async function inviteToLogin(ctx) {
   const telegramId = ctx.from.id;
   const username = ctx.from.username || "";
-  const loginUrl = `${OPENRECIPE_FE_BASEURL}/login?telegram_id=${telegramId}&telegram_username=${username}`;
+  const loginUrl = `${REELCIPE_FE_BASEURL}/login?telegram_id=${telegramId}&telegram_username=${username}`;
 
-  if (OPENRECIPE_FE_BASEURL.startsWith("http://")) {
+  if (REELCIPE_FE_BASEURL.startsWith("http://")) {
     await ctx.reply(`Accedi al servizio: ${loginUrl}`);
   } else {
     await ctx.reply(

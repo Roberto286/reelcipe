@@ -8,7 +8,7 @@ export const authMiddleware = define.middleware(async (ctx) => {
   const sessionToken = cookies["better-auth.session_token"];
 
   if (!sessionToken) {
-    console.log("Session token missing, proceeding to next middleware");
+    console.warn("Session token missing, proceeding to next middleware");
     return ctx.next();
   }
 
@@ -22,18 +22,16 @@ export const authMiddleware = define.middleware(async (ctx) => {
     });
 
     if (response.ok) {
-      console.log("response :>> ", response);
       const data = await response.json();
-      if (data.session && data.user) {
+      if (data?.session && data?.user) {
         ctx.state.authenticated = true;
         ctx.state.user = data.user;
         ctx.state.session = data.session;
-        console.log("Authentication successful for user:", data.user.id);
       } else {
-        console.log("No valid session, proceeding to next middleware");
+        console.error("No valid session, proceeding to next middleware");
       }
     } else {
-      console.log("Backend returned error status:", response.status);
+      console.error("Backend returned error status:", response.status);
     }
   } catch (error) {
     console.error("Network error during authentication:", error);

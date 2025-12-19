@@ -8,7 +8,6 @@ export async function downloadVideo(url) {
     url,
   ]);
   //Non avevo sbatti di implementare il download del video in node quindi ho importato il downloader dalla versione in python e lo richiamiamo da qui
-  console.log("stdout :>> ", stdout);
   const downloadedVideoInfo = JSON.parse(stdout);
 
   if (downloadedVideoInfo.status === Status.ERROR) {

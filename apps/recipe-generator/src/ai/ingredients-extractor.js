@@ -16,30 +16,32 @@ export async function extractIngredients(
     comments: comments || "",
   });
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${OPENAI_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
+      model: "gpt-5-nano",
+      input: [
         {
           role: "system",
           content: ingredientsExtractorSystemPrompt,
         },
-        { role: "user", content: prompt },
+        {
+          role: "user",
+          content: prompt,
+        },
       ],
-      temperature: 0,
-      top_p: 1,
-      max_tokens: 1000,
     }),
   });
 
   const json = await res.json();
   console.log("json :>> ", json);
-  const content = json.choices?.[0]?.message?.content;
+  const content = json.output
+    .find((o) => o.type === "message")
+    .content.find((c) => c.type === "output_text").text;
 
   try {
     return JSON.parse(content);

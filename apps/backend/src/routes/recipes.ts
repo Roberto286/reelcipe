@@ -86,9 +86,10 @@ recipes.post("/", authMiddleware, async (c) => {
   try {
     const userId = c.get("userId");
     const body = await c.req.json();
+    console.log("body :>> ", body);
     const {
       title,
-      image_url,
+      thumbnailUrl,
       downloaded_from,
       default_serves,
       rating,
@@ -96,7 +97,7 @@ recipes.post("/", authMiddleware, async (c) => {
       methods,
     } = body;
 
-    if (!title || !image_url) {
+    if (!title || !thumbnailUrl) {
       return c.json({ error: "Title and image_url are required" }, 400);
     }
 
@@ -105,7 +106,7 @@ recipes.post("/", authMiddleware, async (c) => {
     // Create recipe
     const recipe: Recipe = {
       title,
-      image_url,
+      image_url: thumbnailUrl,
       downloaded_from: downloaded_from || "",
       default_serves: default_serves || 2,
       rating: rating || 0,

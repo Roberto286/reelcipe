@@ -11,7 +11,6 @@ export function extractBodyFromRequest(req) {
         const parsedBody = JSON.parse(body);
         resolve(parsedBody);
       } catch (error) {
-        console.log("error :>> ", error);
         reject(new Error("Invalid JSON"));
       }
     });

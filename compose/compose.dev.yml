@@ -5,8 +5,6 @@ services:
       dockerfile: apps/backend/Dockerfile
     volumes:
       - ../apps/backend:/app/apps/backend
-    ports:
-      - "8000:8000"
     command: deno task dev
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret}
@@ -34,5 +32,3 @@ services:
       dockerfile: apps/recipe-generator/Dockerfile
     volumes:
       - ../apps/recipe-generator:/app/apps/recipe-generator
-    ports:
-      - "7823:8000"

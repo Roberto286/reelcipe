@@ -2,6 +2,8 @@ services:
   mongodb:
     image: mongo:8.0
     container_name: mongodb
+    ports:
+      - "27017:27017"
     volumes:
       - mongodb-data:/data/db
     environment:
@@ -35,6 +37,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8000
       BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      REELCIPE_FE_BASEURL: ${REELCIPE_FE_BASEURL}
     networks: [default]
     dns:
       - 1.1.1.1
@@ -44,8 +47,12 @@ services:
 
   recipe-generator:
     container_name: recipe-generator
+    build:
+      context: ../
+      dockerfile: apps/recipe-generator/Dockerfile
     environment:
       BACKEND_URL: http://backend:8000
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     networks: [default]
 
 volumes:

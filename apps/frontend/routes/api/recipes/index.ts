@@ -29,7 +29,7 @@ export const handler = define.handlers({
       }
 
       // Generate and save recipe
-      const response = await fetch("http://recipe-generator:8000/recipe", {
+      const response = await fetch("http://recipe-generator:3000/recipe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

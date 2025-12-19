@@ -7,7 +7,6 @@ export const handler = define.handlers({
   async GET(ctx) {
     const cookies = getCookies(ctx.req.headers);
     const sessionToken = cookies["better-auth.session_token"];
-    console.log("sessionToken :>> ", sessionToken);
     // Call Better Auth sign-out endpoint if session exists
     if (sessionToken) {
       try {

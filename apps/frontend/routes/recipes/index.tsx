@@ -30,7 +30,6 @@ export const handler = define.handlers({
 });
 
 export default define.page(function DashboardPage({ data }) {
-  console.log('data :>> ', data);
   const { recipes, error } = data as Data;
 
   return (

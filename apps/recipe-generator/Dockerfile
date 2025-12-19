@@ -48,7 +48,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app/
 
 COPY --from=builder /app ./
-EXPOSE 5173
+EXPOSE 3000
 
 WORKDIR /app/apps/recipe-generator
 CMD ["deno", "task", "dev"]

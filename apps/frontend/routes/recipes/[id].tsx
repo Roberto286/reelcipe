@@ -12,7 +12,6 @@ interface Data {
 export const handler = define.handlers(async (ctx) => {
   const recipeId = ctx.params.id;
   const sessionToken = ctx.state.session?.token;
-  console.log("sessionToken :>> ", sessionToken);
   const recipe = await getRecipe(recipeId, sessionToken);
   if (!recipe) {
     return {

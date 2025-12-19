@@ -3,11 +3,9 @@ import { generateRecipe } from "../ai/recipe-generator.js";
 import { transcribeAudio } from "../ai/transcriber.js";
 import { extractAudioFrom } from "../audio/processor.js";
 import { Status } from "../enum/status.enum.js";
-import { saveGeneratedRecipe } from "@reelcipe/shared";
 import { downloadVideo } from "../video/processor.js";
 
 export async function startRecipeGeneration(url, sessionToken, userId) {
-  console.log("entrato :>> ");
   const videoInfo = await downloadVideo(url);
 
   if (videoInfo.status === Status.ERROR) {
@@ -37,8 +35,6 @@ export async function startRecipeGeneration(url, sessionToken, userId) {
     ingredients,
   });
 
-  console.log("recipe, metadata :>> ", recipe, metadata);
-
   const generatedRecipe = {
     ...recipe,
     thumbnailUrl: videoInfo.metadata.thumbnailUrl,
@@ -53,4 +49,33 @@ export async function startRecipeGeneration(url, sessionToken, userId) {
   );
 
   return recipeId;
+}
+
+export async function saveGeneratedRecipe(
+  generatedRecipe,
+  url,
+  sessionToken,
+  userId
+) {
+  const backendUrl = process.env.BACKEND_URL || "http://backend:8000";
+
+  const response = await fetch(`${backendUrl}/api/recipes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sessionToken}`,
+    },
+    body: JSON.stringify({
+      ...generatedRecipe,
+      downloadedFrom: url,
+      userId: userId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save recipe: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.id;
 }

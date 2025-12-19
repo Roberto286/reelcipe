@@ -9,10 +9,9 @@ export async function generateRecipe(
   { description, comments, ingredients }
 ) {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  const API_URL = "https://api.openai.com/v1/chat/completions";
+  const API_URL = "https://api.openai.com/v1/responses";
 
-  // Modello consigliato per costo/performance
-  const MODEL = "gpt-4o-mini"; // Miglior rapporto qualità/prezzo
+  const MODEL = "gpt-5-nano";
 
   const formattedIngredients = ingredients?.length
     ? `## Extracted ingredients to use in the recipe (do not modify them):\n${ingredients
@@ -33,15 +32,10 @@ export async function generateRecipe(
   });
   const requestBody = {
     model: MODEL,
-    messages: [
+    input: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
-    max_tokens: 2000,
-    temperature: 0.1,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
   };
 
   try {
@@ -65,11 +59,9 @@ export async function generateRecipe(
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error("Invalid OpenAI response");
-    }
-
-    const jsonResponse = data.choices[0].message.content.trim();
+    const jsonResponse = data.output
+      .find((o) => o.type === "message")
+      .content.find((c) => c.type === "output_text").text;
 
     // Parse the JSON response
     let recipe;
@@ -83,7 +75,6 @@ export async function generateRecipe(
     const metadata = {
       model: data.model,
       usage: data.usage,
-      finishReason: data.choices[0].finish_reason,
     };
 
     return {

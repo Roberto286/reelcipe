@@ -9,7 +9,7 @@ import { extractBodyFromRequest } from "./lib/extract-body-from-request.js";
 import { mockRecipe } from "./mock-recipe.js";
 import { startRecipeGeneration } from "./recipe/processor.js";
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const REQUIRED_ENV_VARIABLES = ["OPENAI_API_KEY"];
 
 checkEnv();
@@ -58,7 +58,6 @@ http
     try {
       recipeId = await startRecipeGeneration(url, sessionToken, userId);
     } catch (e) {
-      console.log("e :>> ", e);
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Internal Server Error" }));
       return;
