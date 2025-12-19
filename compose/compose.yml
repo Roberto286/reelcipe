@@ -20,24 +20,20 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-    environment:
-      MONGODB_URI: mongodb://mongodb:27017
-      MONGODB_DB: reelcipe
-      PORT: 8000
+    env_file:
+      - ../.env
     networks: [default]
 
   frontend:
     container_name: frontend
-    environment:
-      BACKEND_URL: http://backend:8000
+    env_file:
+      - ../.env
     networks: [default]
 
   telegram-bot:
     container_name: telegram-bot
-    environment:
-      BACKEND_URL: http://backend:8000
-      BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      REELCIPE_FE_BASEURL: ${REELCIPE_FE_BASEURL}
+    env_file:
+      - ../.env
     networks: [default]
     dns:
       - 1.1.1.1
@@ -50,9 +46,8 @@ services:
     build:
       context: ../
       dockerfile: apps/recipe-generator/Dockerfile
-    environment:
-      BACKEND_URL: http://backend:8000
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    env_file:
+      - ../.env
     networks: [default]
 
 volumes:

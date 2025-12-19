@@ -1,0 +1,20 @@
+{
+  "name": "recipe-generator",
+  "dockerComposeFile": [
+  "../../compose/compose.yml",
+  "../../compose/compose.dev.yml"
+],
+  "service": "recipe-generator",
+  "workspaceFolder": "/app/apps/recipe-generator",
+  "customizations": {
+    "vscode": {
+      "extensions": ["denoland.vscode-deno", "ms-azuretools.vscode-docker"],
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Development environment ready!'",
+  "remoteUser": "root"
+}

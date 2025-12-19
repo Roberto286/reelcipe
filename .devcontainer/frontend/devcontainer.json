@@ -1,0 +1,20 @@
+{
+  "name": "frontend",
+  "dockerComposeFile": [
+  "../../compose/compose.yml",
+  "../../compose/compose.dev.yml"
+],
+  "service": "frontend",
+  "workspaceFolder": "/app/apps/frontend",
+  "customizations": {
+    "vscode": {
+      "extensions": ["denoland.vscode-deno", "ms-azuretools.vscode-docker"],
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Development environment ready!'",
+  "remoteUser": "root"
+}

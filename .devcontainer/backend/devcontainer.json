@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "dockerComposeFile": [
+  "../../compose/compose.yml",
+  "../../compose/compose.dev.yml"
+],
+  "service": "backend",
+  "workspaceFolder": "/app/apps/backend",
+  "customizations": {
+    "vscode": {
+      "extensions": ["denoland.vscode-deno", "ms-azuretools.vscode-docker"],
+      "settings": {
+        "deno.enable": true,
+        "deno.lint": true,
+        "deno.path": "/usr/bin/deno"
+      }
+    }
+  },
+  "remoteUser": "root",
+  "overrideCommand": true,
+  "forwardPorts": [9229]
+}
