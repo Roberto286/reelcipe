@@ -39,20 +39,56 @@ export async function handleMessage(ctx) {
     }
   );
   if (!recipeGeneratorResponse.ok) {
+    let errorDetail = recipeGeneratorResponse.statusText;
+    try {
+      const errorData = await recipeGeneratorResponse.json();
+      if (errorData?.error) {
+        errorDetail = errorData.error;
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+    console.error("Recipe generator error:", errorDetail);
     await ctx.reply(
-      `Errore nel generare la ricetta: ${recipeGeneratorResponse.statusText}`
+      `Errore nel generare la ricetta: ${errorDetail}`
     );
     return;
   }
 
-  const recipe = (await recipeGeneratorResponse.json())?.result?.data;
+  const recipeResult = await recipeGeneratorResponse.json();
+  console.log("Recipe generator response:", JSON.stringify(recipeResult));
+  const recipeId = recipeResult?.result?.recipeId;
 
-  if (!recipe) {
+  if (!recipeId) {
+    console.error("No recipeId in response:", recipeResult);
     await ctx.reply("Non sono riuscito a generare la ricetta");
     return;
   }
 
-  await ctx.replyWithMarkdown(recipe);
+  // Fetch the full recipe from backend
+  const recipeResponse = await fetch(`${BACKEND_URL}/api/recipes/${recipeId}`, {
+    headers: {
+      Authorization: `Bearer ${ctx.session?.session_token}`,
+    },
+  });
+
+  if (!recipeResponse.ok) {
+    const errorText = await recipeResponse.text();
+    console.error("Failed to fetch recipe:", {
+      status: recipeResponse.status,
+      statusText: recipeResponse.statusText,
+      body: errorText,
+      recipeId,
+    });
+    await ctx.reply("Non è stato possibile recuperare la ricetta");
+    return;
+  }
+
+  const recipe = await recipeResponse.json();
+  
+  // Format recipe for display
+  const formattedRecipe = formatRecipeForDisplay(recipe);
+  await ctx.replyWithMarkdown(formattedRecipe);
 }
 
 async function handleCommand(ctx, command) {
@@ -130,4 +166,32 @@ async function inviteToLogin(ctx) {
       ])
     );
   }
+}
+
+function formatRecipeForDisplay(recipe) {
+  let text = `*${recipe.title || "Ricetta senza titolo"}*\n\n`;
+  
+  if (recipe.description) {
+    text += `${recipe.description}\n\n`;
+  }
+  
+  text += `*Ingredienti:*\n`;
+  if (recipe.ingredients && recipe.ingredients.length > 0) {
+    recipe.ingredients.forEach(ing => {
+      text += `• ${ing.name}`;
+      if (ing.quantity && ing.unit) {
+        text += ` - ${ing.quantity} ${ing.unit}`;
+      }
+      text += `\n`;
+    });
+  }
+  
+  text += `\n*Preparazione:*\n`;
+  if (recipe.method && recipe.method.length > 0) {
+    recipe.method.forEach(step => {
+      text += `${step.stepNumber}. ${step.text}\n`;
+    });
+  }
+  
+  return text;
 }

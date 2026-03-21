@@ -27,8 +27,41 @@ recipes.get("/", authMiddleware, async (c) => {
       recipesCol.countDocuments({ user_id: new ObjectId(userId) }),
     ]);
 
+    // Fetch tags for all recipes
+    const recipeIds = recipesList.map(r => r._id).filter(Boolean);
+    const recipeTags = await db.collection("recipe_tags").find({
+      recipe_id: { $in: recipeIds }
+    }).toArray();
+
+    const tagIds = recipeTags.map(rt => rt.tag_id);
+    const tags = await db.collection("tags").find({
+      _id: { $in: tagIds }
+    }).toArray();
+
+    // Transform to frontend format
+    const transformedRecipes = recipesList.map(recipe => {
+      const recipeTagIds = recipeTags
+        .filter(rt => rt.recipe_id.toString() === recipe._id!.toString())
+        .map(rt => rt.tag_id);
+
+      const recipeTagsList = tags
+        .filter(t => recipeTagIds.some(rtid => rtid.toString() === t._id.toString()))
+        .map(t => ({ id: t._id!.toString(), name: t.name }));
+
+      return {
+        id: recipe._id!.toString(),
+        title: recipe.title,
+        imageUrl: recipe.image_url,
+        rating: recipe.rating,
+        defaultServes: recipe.default_serves,
+        downloadedFrom: recipe.downloaded_from,
+        createdAt: recipe.created_at.toISOString(),
+        tags: recipeTagsList,
+      };
+    });
+
     return c.json({
-      recipes: recipesList,
+      recipes: transformedRecipes,
       pagination: {
         page,
         limit,
@@ -58,7 +91,7 @@ recipes.get("/:id", authMiddleware, async (c) => {
       return c.json({ error: "Recipe not found" }, 404);
     }
 
-    const [ingredients, methods] = await Promise.all([
+    const [ingredients, methods, recipeTags, allTags] = await Promise.all([
       db
         .collection<Ingredient>("ingredients")
         .find({ recipe_id: new ObjectId(id) })
@@ -68,13 +101,42 @@ recipes.get("/:id", authMiddleware, async (c) => {
         .find({ recipe_id: new ObjectId(id) })
         .sort({ step_number: 1 })
         .toArray(),
+      db.collection("recipe_tags").find({ recipe_id: new ObjectId(id) }).toArray(),
+      db.collection("tags").find().toArray(),
     ]);
 
-    return c.json({
-      ...recipe,
-      ingredients,
-      methods,
-    });
+    // Transform tags
+    const recipeTagIds = recipeTags.map(rt => rt.tag_id);
+    const tags = allTags
+      .filter(t => recipeTagIds.some(rtid => rtid.toString() === t._id.toString()))
+      .map(t => ({ id: t._id!.toString(), name: t.name }));
+
+    // Transform to frontend format
+    const transformedRecipe = {
+      id: recipe._id!.toString(),
+      title: recipe.title,
+      imageUrl: recipe.image_url,
+      rating: recipe.rating,
+      defaultServes: recipe.default_serves,
+      downloadedFrom: recipe.downloaded_from,
+      createdAt: recipe.created_at.toISOString(),
+      tags,
+      ingredients: ingredients.map(ing => ({
+        id: ing._id!.toString(),
+        recipeId: id,
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+      })),
+      method: methods.map(m => ({
+        id: m._id!.toString(),
+        recipeId: id,
+        stepNumber: m.step_number,
+        text: m.text,
+      })),
+    };
+
+    return c.json(transformedRecipe);
   } catch (error) {
     console.error("Get recipe error:", error);
     return c.json({ error: "Internal server error" }, 500);
@@ -144,7 +206,7 @@ recipes.post("/", authMiddleware, async (c) => {
     return c.json(
       {
         message: "Recipe created successfully",
-        recipe_id: recipeId,
+        recipe_id: recipeId.toString(),
       },
       201
     );

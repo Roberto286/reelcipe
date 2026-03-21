@@ -16,7 +16,7 @@ export default function RecipeCard(props: RecipeDashboard) {
           <div class="badge badge-secondary">{props.rating}/5</div>
         </h2>
         <div class="card-actions justify-end">
-          {props.tags.slice(0,3).map((t) => (
+          {props.tags?.slice(0,3).map((t) => (
             <div key={t.id} class="badge badge-outline">{t.name}</div>
           ))}
         </div>

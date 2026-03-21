@@ -6,7 +6,6 @@ import {
   sendUnauthorized,
 } from "./http/responses.js";
 import { extractBodyFromRequest } from "./lib/extract-body-from-request.js";
-import { mockRecipe } from "./mock-recipe.js";
 import { startRecipeGeneration } from "./recipe/processor.js";
 
 const PORT = 3000;
@@ -40,26 +39,13 @@ http
       return sendUnauthorized(res, "Authentication required");
     }
 
-    // Development mode: return mock data
-    // if (process.env.NODE_ENV === "development") {
-    //   res.writeHead(200, { "Content-Type": "application/json" });
-    //   res.end(
-    //     JSON.stringify({
-    //       message: "Recipe generated successfully!",
-    //       result: {
-    //         data: mockRecipe,
-    //       },
-    //     })
-    //   );
-    //   return;
-    // }
-
     let recipeId;
     try {
       recipeId = await startRecipeGeneration(url, sessionToken, userId);
     } catch (e) {
+      console.error("Recipe generation failed:", e.message);
       res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Internal Server Error" }));
+      res.end(JSON.stringify({ error: e.message || "Internal Server Error" }));
       return;
     }
 

@@ -38,7 +38,7 @@ services:
 
   recipe-generator:
     build:
-      context: ../
+      context: ..
       dockerfile: apps/recipe-generator/Dockerfile
     volumes:
       - ../apps/recipe-generator:/app/apps/recipe-generator

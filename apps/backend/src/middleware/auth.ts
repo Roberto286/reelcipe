@@ -9,7 +9,7 @@ export async function authMiddleware(c: Context, next: Next) {
   const authHeader = headers.get("authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.replace("Bearer ", "").trim();
-    headers.set("cookie", `better-auth.session_data=${token}`);
+    headers.set("cookie", `better-auth.session_token=${token}`);
   }
 
   const session = await auth.api.getSession({ headers });
@@ -17,11 +17,13 @@ export async function authMiddleware(c: Context, next: Next) {
   if (!session) {
     c.set("user", null);
     c.set("session", null);
+    c.set("userId", null);
     await next();
     return;
   }
 
   c.set("user", session.user);
   c.set("session", session.session);
+  c.set("userId", session.user.id);
   await next();
 }

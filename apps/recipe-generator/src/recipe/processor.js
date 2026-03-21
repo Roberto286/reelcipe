@@ -73,9 +73,13 @@ export async function saveGeneratedRecipe(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to save recipe: ${response.statusText}`);
+    const errorText = await response.text();
+    throw new Error(`Failed to save recipe: ${response.statusText} - ${errorText}`);
   }
 
   const data = await response.json();
-  return data.id;
+  if (!data.recipe_id) {
+    throw new Error(`Invalid response from backend: ${JSON.stringify(data)}`);
+  }
+  return data.recipe_id;
 }
