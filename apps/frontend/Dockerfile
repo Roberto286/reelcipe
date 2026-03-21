@@ -24,7 +24,12 @@ FROM denoland/deno:2.5.5
 WORKDIR /app/
 COPY --from=builder /app ./
 
-EXPOSE 5173
+# Create non-root user
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 5173 8000
 
 WORKDIR /app/apps/frontend
 

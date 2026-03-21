@@ -9,6 +9,7 @@ services:
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-secret}
       BETTER_AUTH_URL: http://localhost:8000
+    user: root
 
   frontend:
     build:
@@ -18,6 +19,13 @@ services:
       - ../apps/frontend:/app/apps/frontend
     ports:
       - "3500:5173"
+    user: root
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:5173').then(r => r.ok ? Deno.exit(0) : Deno.exit(1)).catch(() => Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   telegram-bot:
     build:
@@ -25,6 +33,8 @@ services:
       dockerfile: apps/telegram-bot/Dockerfile
     volumes:
       - ../apps/telegram-bot:/app/apps/telegram-bot
+      - telegram-bot-db:/app/apps/telegram-bot/db
+    user: root
 
   recipe-generator:
     build:
@@ -32,3 +42,7 @@ services:
       dockerfile: apps/recipe-generator/Dockerfile
     volumes:
       - ../apps/recipe-generator:/app/apps/recipe-generator
+    user: root
+
+volumes:
+  telegram-bot-db:

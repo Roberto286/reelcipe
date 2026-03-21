@@ -1,29 +1,62 @@
 services:
   frontend:
+    build:
+      context: ../
+      dockerfile: apps/frontend/Dockerfile
     environment:
       DENO_ENV: production
-    command: sh -lc "deno task start || deno run -A /app/main.ts"
+    command: deno task start
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   telegram-bot:
+    build:
+      context: ../
+      dockerfile: apps/telegram-bot/Dockerfile
     environment:
-      NODE_ENV: production
-    # Se hai uno script build e uno start:prod, attivalo qui:
-    # command: sh -lc "pnpm -s build && pnpm -s start:prod"
-    command: pnpm start
+      DENO_ENV: production
+    command: deno task start
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "Deno.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   recipe-generator:
+    build:
+      context: ../
+      dockerfile: apps/recipe-generator/Dockerfile
     environment:
-      NODE_ENV: production
-    # Esempio alternativo:
-    # command: sh -lc "pnpm -s build && node dist/index.js"
+      DENO_ENV: production
+    command: deno task start
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "deno eval 'Deno.connect({port: 3000}).then(() => Deno.exit(0)).catch(() => Deno.exit(1))'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   backend:
+    build:
+      context: ../
+      dockerfile: apps/backend/Dockerfile
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
       DENO_ENV: production
-    # command: sh -lc "deno task start || deno run -A /app/apps/backend/server.ts"
+    command: deno task start
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000/health').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

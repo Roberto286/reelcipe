@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:8.0
+    image: mongo:6.0
     container_name: mongodb
     ports:
       - "27017:27017"
@@ -23,12 +23,24 @@ services:
     env_file:
       - ../.env
     networks: [default]
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000/health').then(r => r.ok ? Deno.exit(0) : Deno.exit(1)).catch(() => Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   frontend:
     container_name: frontend
     env_file:
       - ../.env
     networks: [default]
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1)).catch(() => Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   telegram-bot:
     container_name: telegram-bot
@@ -40,15 +52,24 @@ services:
       - 8.8.8.8
     extra_hosts:
       - "api.telegram.org:149.154.167.220"
+    healthcheck:
+      test: ["CMD", "deno", "eval", "Deno.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   recipe-generator:
     container_name: recipe-generator
-    build:
-      context: ../
-      dockerfile: apps/recipe-generator/Dockerfile
     env_file:
       - ../.env
     networks: [default]
+    healthcheck:
+      test: ["CMD-SHELL", "deno eval 'Deno.connect({port: 3000}).then(() => Deno.exit(0)).catch(() => Deno.exit(1))'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
   mongodb-data:

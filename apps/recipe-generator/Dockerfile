@@ -1,5 +1,5 @@
 # Stage python deps
-FROM denoland/deno:debian-2.5.1 AS python-deps
+FROM denoland/deno:debian-2.5.5 AS python-deps
 
 RUN apt-get update && apt-get install -y \
     python3 python3-pip python3-venv \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # Stage Deno deps
-FROM denoland/deno:debian-2.5.1 AS deno-deps
+FROM denoland/deno:debian-2.5.5 AS deno-deps
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ COPY deno.json deno.lock* ./
 RUN deno cache --lock=deno.lock deno.json
 
 # Stage builder
-FROM denoland/deno:debian-2.5.1 AS builder
+FROM denoland/deno:debian-2.5.5 AS builder
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ WORKDIR /app/apps/recipe-generator
 RUN deno cache src/main.js
 
 # Stage runtime
-FROM denoland/deno:debian-2.5.1
+FROM denoland/deno:debian-2.5.5
 
 RUN apt-get update && apt-get install -y \
     python3 ffmpeg bash git \
@@ -45,9 +45,15 @@ RUN apt-get update && apt-get install -y \
 COPY --from=python-deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Create non-root user
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
 WORKDIR /app/
 
 COPY --from=builder /app ./
+RUN chown -R appuser:appgroup /app
+USER appuser
+
 EXPOSE 3000
 
 WORKDIR /app/apps/recipe-generator

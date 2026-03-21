@@ -1,5 +1,5 @@
 # Stage deps
-FROM denoland/deno:2.5.1 AS deps
+FROM denoland/deno:2.5.5 AS deps
 WORKDIR /app
 
 COPY deno.json deno.lock* ./
@@ -8,7 +8,7 @@ COPY deno.json deno.lock* ./
 RUN deno cache --lock=deno.lock deno.json
 
 # Stage builder
-FROM denoland/deno:2.5.1 AS builder
+FROM denoland/deno:2.5.5 AS builder
 WORKDIR /app
 
 COPY --from=deps /app/deno.json /app/deno.lock* ./
@@ -20,14 +20,18 @@ WORKDIR /app/apps/telegram-bot
 RUN deno cache src/main.js
 
 # Stage runtime
-FROM denoland/deno:2.5.1
+FROM denoland/deno:2.5.5
 WORKDIR /app
 COPY --from=builder /app ./
 
-# Directory persistente del bot
-RUN mkdir -p db
+# Create non-root user
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
-EXPOSE 8000
+# Directory persistente del bot
+RUN mkdir -p db && chown -R appuser:appgroup /app
+USER appuser
+
+EXPOSE 8001
 WORKDIR /app/apps/telegram-bot
 
 CMD ["deno", "task", "start"]
