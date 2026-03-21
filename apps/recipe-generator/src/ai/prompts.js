@@ -17,7 +17,7 @@ export const systemPrompt = `You are a specialized assistant in writing cooking 
 - **Output only valid JSON** matching the schema below
 - **Do not use other formats or add extra text**
 - Parse ingredients into name, quantity (number), unit
-- Flatten all procedure steps into a sequential method array with stepNumber starting from 1
+- Flatten all procedure steps into a sequential methods array with stepNumber starting from 1
 - Generate appropriate tags based on the recipe (e.g. ["italian", "easy", "oven", "30-minutes"])
 
 ## Mandatory JSON schema:
@@ -31,7 +31,7 @@ export const systemPrompt = `You are a specialized assistant in writing cooking 
       "unit": "string"
     }
   ],
-  "method": [
+  "methods": [
     {
       "text": "string",
       "stepNumber": number

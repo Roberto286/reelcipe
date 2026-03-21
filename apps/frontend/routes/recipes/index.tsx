@@ -12,15 +12,18 @@ export const handler = define.handlers({
   GET: async (ctx) => {
     try {
       const sessionToken = ctx.state.sessionToken;
-      const recipes = await fetch(`http://backend:8000/api/recipes`, {
+      const response = await fetch(`http://backend:8000/api/recipes`, {
         headers: {
           Authorization: `Bearer ${sessionToken}`,
         },
-      }).then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch recipes");
-        return res.json();
       });
-      return { data: { recipes } };
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch recipes: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return { data: { recipes: data.recipes ?? [] } };
     } catch (error) {
       console.error(error);
       return { data: { error: "Failed to load recipes. Please try again." } };
