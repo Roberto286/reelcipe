@@ -10,6 +10,19 @@ import { MESSAGES } from "../login.tsx";
 
 const BACKEND_URL = "http://backend:8000";
 
+function extractSessionTokenFromCookieHeader(cookieHeader: string): string {
+  const cookies = cookieHeader.split(";");
+  for (const cookie of cookies) {
+    const eqIdx = cookie.indexOf("=");
+    const name = eqIdx > -1 ? cookie.slice(0, eqIdx).trim() : cookie.trim();
+    const value = eqIdx > -1 ? cookie.slice(eqIdx + 1) : "";
+    if (name === "better-auth.session_token") {
+      return value;
+    }
+  }
+  return "";
+}
+
 export const handler = define.handlers({
   async POST(ctx) {
     try {
@@ -20,7 +33,7 @@ export const handler = define.handlers({
 
       // Extract telegram fields for both modes
       const telegramId = form.get("telegram_id")?.toString() || "";
-      const telegramUsername = form.get("username")?.toString() || "";
+      const telegramUsername = form.get("telegram_username")?.toString() || "";
       const isComingFromTelegram =
         Boolean(telegramId) && Boolean(telegramUsername);
 
@@ -68,9 +81,12 @@ export const handler = define.handlers({
 
           // Get session cookie from response
           const setCookieHeader = response.headers.get("set-cookie");
+          const sessionToken = setCookieHeader
+            ? extractSessionTokenFromCookieHeader(setCookieHeader)
+            : "";
 
           // After successful registration, notify Telegram bot if coming from Telegram
-          if (isComingFromTelegram && result.user) {
+          if (isComingFromTelegram && result.user && sessionToken) {
             try {
               await fetch("http://telegram-bot:8001/user-registered", {
                 method: "POST",
@@ -81,6 +97,7 @@ export const handler = define.handlers({
                   telegramId,
                   telegram_username: telegramUsername,
                   userId: result.user.id,
+                  session_token: sessionToken,
                 }),
               });
             } catch (botError) {
@@ -122,9 +139,12 @@ export const handler = define.handlers({
 
           // Get session cookie from response
           const setCookieHeader = response.headers.get("set-cookie");
+          const sessionToken = setCookieHeader
+            ? extractSessionTokenFromCookieHeader(setCookieHeader)
+            : "";
 
           // After successful login, notify Telegram bot if coming from Telegram
-          if (isComingFromTelegram && result.user) {
+          if (isComingFromTelegram && result.user && sessionToken) {
             try {
               await fetch("http://telegram-bot:8001/user-logged-in", {
                 method: "POST",
@@ -135,6 +155,7 @@ export const handler = define.handlers({
                   telegramId,
                   telegram_username: telegramUsername,
                   userId: result.user.id,
+                  session_token: sessionToken,
                 }),
               });
             } catch (botError) {

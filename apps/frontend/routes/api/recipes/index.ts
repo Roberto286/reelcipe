@@ -22,7 +22,7 @@ export const handler = define.handlers({
       }
 
       const userId = ctx.state.user.id;
-      const sessionToken = ctx.state.session?.token;
+      const sessionToken = ctx.state.sessionToken;
 
       if (!sessionToken) {
         return createErrorRedirect("Session token missing");

@@ -27,6 +27,7 @@ export const authMiddleware = define.middleware(async (ctx) => {
         ctx.state.authenticated = true;
         ctx.state.user = data.user;
         ctx.state.session = data.session;
+        ctx.state.sessionToken = sessionToken;
       } else {
         console.error("No valid session, proceeding to next middleware");
       }

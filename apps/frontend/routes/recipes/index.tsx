@@ -11,7 +11,7 @@ interface Data {
 export const handler = define.handlers({
   GET: async (ctx) => {
     try {
-      const sessionToken = ctx.state.session?.token;
+      const sessionToken = ctx.state.sessionToken;
       const recipes = await fetch(`http://backend:8000/api/recipes`, {
         headers: {
           Authorization: `Bearer ${sessionToken}`,

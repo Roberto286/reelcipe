@@ -91,13 +91,13 @@ async function handleAuthentication(ctx) {
       const response = await fetch(`${BACKEND_URL}/api/auth/get-session`, {
         method: "GET",
         headers: {
-          Cookie: `better_auth.session_token=${sessionToken}`,
+          Cookie: `better-auth.session_token=${sessionToken}`,
         },
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.session && data.user) {
+        if (data && data.session && data.user) {
           isValid = true;
           ctx.session.user_id = data.user.id;
         }
