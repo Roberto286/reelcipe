@@ -1,31 +1,51 @@
 import { define } from "../../utils.ts";
 import { Head } from "fresh/runtime";
 import { useEffect, useState } from "preact/hooks";
-import { getRecipe, type Recipe } from "@reelcipe/shared";
+import type { Recipe } from "@reelcipe/shared";
+
+const BACKEND_URL = "http://backend:8000";
 
 interface Data {
   recipe?: Recipe;
   error?: string;
   isEditing?: boolean;
+  url: string;
 }
 
 export const handler = define.handlers(async (ctx) => {
   const recipeId = ctx.params.id;
-  const sessionToken = ctx.state.session?.token;
-  const recipe = await getRecipe(recipeId, sessionToken);
-  if (!recipe) {
+  const sessionToken = ctx.state.sessionToken;
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/recipes/${recipeId}`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    });
+    if (!response.ok) {
+      return {
+        data: {
+          recipe: undefined,
+          error: "Recipe not found",
+          isEditing: false,
+          url: ctx.req.url,
+        },
+      };
+    }
+    const recipe = await response.json();
+    const url = new URL(ctx.req.url);
+    const isEditing = url.searchParams.get("mode") === "edit";
+    return { data: { recipe, error: undefined, isEditing, url: ctx.req.url } };
+  } catch (error) {
+    console.error(error);
     return {
       data: {
         recipe: undefined,
-        error: "Recipe not found",
+        error: "Failed to fetch recipe",
         isEditing: false,
         url: ctx.req.url,
       },
     };
   }
-  const url = new URL(ctx.req.url);
-  const isEditing = url.searchParams.get("mode") === "edit";
-  return { data: { recipe, error: undefined, isEditing, url: ctx.req.url } };
 });
 
 export default define.page<typeof handler>(
