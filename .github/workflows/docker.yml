@@ -64,7 +64,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: ./apps/backend/Dockerfile
+          file: ./apps/backend/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -112,7 +112,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: ./apps/frontend/Dockerfile
+          file: ./apps/frontend/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -160,7 +160,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: ./apps/recipe-generator/Dockerfile
+          file: ./apps/recipe-generator/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -208,7 +208,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: ./apps/telegram-bot/Dockerfile
+          file: ./apps/telegram-bot/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
