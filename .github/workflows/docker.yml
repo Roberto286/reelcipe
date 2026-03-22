@@ -58,13 +58,13 @@ jobs:
             ${{ inputs.custom_tags && format('type=raw,value={0}', inputs.custom_tags) || '' }}
 
       - name: Build and push Backend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: apps/backend/Dockerfile
+          dockerfile: ./apps/backend/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -106,13 +106,13 @@ jobs:
             ${{ inputs.custom_tags && format('type=raw,value={0}', inputs.custom_tags) || '' }}
 
       - name: Build and push Frontend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: apps/frontend/Dockerfile
+          dockerfile: ./apps/frontend/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -154,13 +154,13 @@ jobs:
             ${{ inputs.custom_tags && format('type=raw,value={0}', inputs.custom_tags) || '' }}
 
       - name: Build and push Recipe Generator
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: apps/recipe-generator/Dockerfile
+          dockerfile: ./apps/recipe-generator/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -202,13 +202,13 @@ jobs:
             ${{ inputs.custom_tags && format('type=raw,value={0}', inputs.custom_tags) || '' }}
 
       - name: Build and push Telegram Bot
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          dockerfile: apps/telegram-bot/Dockerfile
+          dockerfile: ./apps/telegram-bot/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
