@@ -1,35 +1,44 @@
-# Stage deps
-FROM denoland/deno:2.5.5 AS deps
-WORKDIR /app
+# syntax=docker/dockerfile:1
 
-COPY deno.json deno.lock* ./
-
-# Cache dipendenze
-RUN deno cache --lock=deno.lock deno.json
-
-# Stage builder
 FROM denoland/deno:2.5.5 AS builder
 WORKDIR /app
 
-COPY --from=deps /app/deno.json /app/deno.lock* ./
+ENV DENO_DIR=/deno-cache
 
+# Copy dependency manifests first for layer caching
+COPY deno.json deno.lock* ./
+
+# Copy source code
 COPY apps/backend ./apps/backend
 COPY packages/shared ./packages/shared
 
+# Cache dependencies and application
 WORKDIR /app/apps/backend
-RUN deno cache main.ts
+RUN deno cache --lock=/app/deno.lock main.ts
 
-# Stage runtime
+# Runtime stage
 FROM denoland/deno:2.5.5
-WORKDIR /app/
-COPY --from=builder /app .
+WORKDIR /app
 
-# Create non-root user
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
-RUN chown -R appuser:appgroup /app
+ENV DENO_DIR=/deno-cache \
+    DENO_ENV=production
+
+# Copy built application and cache
+COPY --from=builder /app/apps/backend ./apps/backend
+COPY --from=builder /app/packages/shared ./packages/shared
+COPY --from=builder /app/deno.json ./deno.json
+COPY --from=builder /app/deno.lock* ./
+COPY --from=builder /deno-cache /deno-cache
+
+# Create non-root user with proper permissions
+RUN groupadd -r appgroup && \
+    useradd -r -g appgroup appuser && \
+    chown -R appuser:appgroup /app /deno-cache
+
 USER appuser
 
 EXPOSE 8000
 
 WORKDIR /app/apps/backend
-CMD ["deno", "task", "start"]
+
+CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-sys", "main.ts"]

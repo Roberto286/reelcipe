@@ -21,3 +21,5 @@ _fresh
 .zed
 **/vite.config.ts.*
 node_modules
+# Temporary files
+.tmp/

@@ -1,6 +1,7 @@
 {
   "nodeModulesDir": "auto",
   "workspace": ["apps/*", "packages/*"],
+  "vendor": true,
   "tasks": {
     "start:dev": "COMPOSE_BAKE=true COMPOSE_PROFILES=dev docker compose --env-file ./.env -f compose/compose.yml -f compose/compose.dev.yml up -d --build",
     "start:prod": "docker compose --env-file ./.env -f compose/compose.yml -f compose/compose.prod.yml up -d --remove-orphans",

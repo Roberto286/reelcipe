@@ -1,54 +1,31 @@
 services:
-  frontend:
-    build:
-      context: ../
-      dockerfile: apps/frontend/Dockerfile
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
     environment:
-      DENO_ENV: production
-    command: deno task start
-    restart: unless-stopped
+      MONGO_INITDB_DATABASE: reelcipe
     healthcheck:
-      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  telegram-bot:
-    build:
-      context: ../
-      dockerfile: apps/telegram-bot/Dockerfile
-    environment:
-      DENO_ENV: production
-    command: deno task start
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "deno", "eval", "Deno.exit(0)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-  recipe-generator:
-    build:
-      context: ../
-      dockerfile: apps/recipe-generator/Dockerfile
-    environment:
-      DENO_ENV: production
-    command: deno task start
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "deno eval 'Deno.connect({port: 3000}).then(() => Deno.exit(0)).catch(() => Deno.exit(1))'"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    networks: [reelcipe-network]
 
   backend:
-    build:
-      context: ../
-      dockerfile: apps/backend/Dockerfile
+    image: ghcr.io/roberto286/reelcipe-backend:latest
+    container_name: backend
+    depends_on:
+      mongodb:
+        condition: service_healthy
     environment:
+      MONGODB_URI: mongodb://mongodb:27017/reelcipe
+      MONGODB_DB: reelcipe
+      PORT: 8000
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
       DENO_ENV: production
@@ -60,3 +37,71 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    networks: [reelcipe-network]
+
+  frontend:
+    image: ghcr.io/roberto286/reelcipe-frontend:latest
+    container_name: frontend
+    environment:
+      DENO_ENV: production
+    ports:
+      - "3500:8000"
+    command: deno task start
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [reelcipe-network]
+
+  telegram-bot:
+    image: ghcr.io/roberto286/reelcipe-telegram-bot:latest
+    container_name: telegram-bot
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      REFRESH_TOKEN_ENCRYPTION_KEY: ${REFRESH_TOKEN_ENCRYPTION_KEY}
+      RECIPE_GENERATOR_BASE_URL_DOCKER: http://recipe-generator:3000
+      REELCIPE_FE_BASEURL: ${REELCIPE_FE_BASEURL}
+      BACKEND_URL: http://backend:8000
+      DENO_ENV: production
+      RUNNER: docker
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "Deno.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [reelcipe-network]
+
+  recipe-generator:
+    image: ghcr.io/roberto286/reelcipe-recipe-generator:latest
+    container_name: recipe-generator
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      BACKEND_URL: http://backend:8000
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "deno eval 'Deno.connectTcp({port: 3000}).then(() => Deno.exit(0)).catch(() => Deno.exit(1))'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [reelcipe-network]
+
+volumes:
+  mongodb-data:
+
+networks:
+  reelcipe-network:
+    name: ${COMPOSE_PROJECT_NAME:-reelcipe}_network

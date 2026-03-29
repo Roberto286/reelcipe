@@ -1,0 +1,62 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb-test
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data-test:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: reelcipe
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks: [reelcipe-test-network]
+
+  backend:
+    image: reelcipe-backend:test
+    container_name: backend-test
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/reelcipe
+      MONGODB_DB: reelcipe
+      PORT: 8000
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      DENO_ENV: production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000/health').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [reelcipe-test-network]
+
+  frontend:
+    image: reelcipe-frontend:test
+    container_name: frontend-test
+    environment:
+      DENO_ENV: production
+    ports:
+      - "3500:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks: [reelcipe-test-network]
+
+volumes:
+  mongodb-data-test:
+
+networks:
+  reelcipe-test-network:
+    name: reelcipe_test_network
