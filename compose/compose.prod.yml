@@ -29,7 +29,6 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
       DENO_ENV: production
-    command: deno task start
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000/health').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
@@ -46,7 +45,6 @@ services:
       DENO_ENV: production
     ports:
       - "3500:8000"
-    command: deno task start
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "deno", "eval", "await fetch('http://localhost:8000').then(r => r.ok ? Deno.exit(0) : Deno.exit(1))"]
